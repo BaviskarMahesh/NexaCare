@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+import 'package:nexacare/attendant/signin_attendant.dart';
+import 'package:nexacare/screens/landingpage.dart';
+import 'package:nexacare/user/signin_User.dart';
+class Approutes {
+  static const String landingPage = '/';
+  static const String signInuser = '/signInuser';
+  static const String signInattendant = '/signInattendant';
+
+  static Route<dynamic> generateRoute(RouteSettings settings) {
+    switch (settings.name) {
+      case landingPage:
+        return MaterialPageRoute(builder: (_) => const Landingpage());
+      case signInuser:
+        return MaterialPageRoute(builder: (_) => SigninUser());
+      case signInattendant:
+        return MaterialPageRoute(builder: (_) => SigninAttendant());
+
+      default:
+        return MaterialPageRoute(
+          builder:
+              (_) =>
+                  const Scaffold(body: Center(child: Text('Page not found!'))),
+        );
+    }
+  }
+}
