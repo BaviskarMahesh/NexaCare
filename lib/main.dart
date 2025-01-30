@@ -19,6 +19,9 @@ class _NexaCareState extends State<NexaCare> {
     return MaterialApp(
       title: 'NexaCare',
       theme: ThemeData(
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xff969292),
+        ),
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff0C0C0C)),
       ),
       darkTheme: ThemeData(brightness: Brightness.dark),

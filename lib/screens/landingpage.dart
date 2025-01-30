@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:nexacare/Attendant/professionalDetails.dart';
+import 'package:nexacare/attendant/signin_attendant.dart';
 import 'package:nexacare/Routes/app_routes.dart';
 import 'package:nexacare/main.dart';
-import 'package:nexacare/user/healthdetails.dart';
+import 'package:nexacare/user/signin_User.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
 
 class Landingpage extends StatefulWidget {
@@ -20,7 +20,7 @@ class _LandingpageState extends State<Landingpage> {
     return Scaffold(
       backgroundColor: Color(0xff0C0C0C),
       body: Padding(
-        padding: const EdgeInsets.only(left: 20),
+        padding: const EdgeInsets.only(left: 25),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -31,7 +31,7 @@ class _LandingpageState extends State<Landingpage> {
               style: TextStyle(
                 fontFamily: 'Font1',
                 color: Color(0xffFFFFFF),
-                fontWeight: FontWeight.bold,
+                //fontWeight: FontWeight.bold,
                 fontSize: 40,
               ),
             ),
@@ -41,30 +41,35 @@ class _LandingpageState extends State<Landingpage> {
               style: TextStyle(
                 fontFamily: 'Font1',
                 color: Color(0xffFFFFFF),
-                fontSize: 20,
+                fontSize: 15,
               ),
             ),
+            SizedBox(height: 20),
             customElevatedButton(
               text: "User",
               textStyle: TextStyle(
                 color: Color(0xffFFFFFF),
-                fontSize: 24,
+                fontSize: 20,
                 fontFamily: 'Font1',
               ),
               onPressed: () {
-                Navigator.pushNamed(context, Approutes.healthDetails);
+                Navigator.pushNamed(context, Approutes.signInuser);
               },
+              buttonSize: const Size(300, 55),
             ),
+            SizedBox(height: 20),
+
             customElevatedButton(
               text: "Attendant",
               textStyle: TextStyle(
                 color: Color(0xffFFFFFF),
-                fontSize: 24,
+                fontSize: 20,
                 fontFamily: 'Font1',
               ),
               onPressed: () {
-                Navigator.pushNamed(context, Approutes.professionalDetails);
+                Navigator.pushNamed(context, Approutes.signInattendant);
               },
+              buttonSize: const Size(300, 55),
             ),
           ],
         ),
