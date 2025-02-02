@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "899597567245",
+    "project_id": "nexacare-d797f",
+    "storage_bucket": "nexacare-d797f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:899597567245:android:60d0931709c6f93553dc44",
+        "android_client_info": {
+          "package_name": "com.example.nexacare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDZXImq2LnYbo_x_D_sNXb7ZX-zlEuh2vg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

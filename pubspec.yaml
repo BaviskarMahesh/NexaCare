@@ -19,6 +19,7 @@ dependencies:
 
   # Cupertino Icons for iOS-style icons.
   cupertino_icons: ^1.0.8
+  firebase_core: ^3.10.1
 
 # Development-only dependencies (used for testing & linting).
 dev_dependencies:
