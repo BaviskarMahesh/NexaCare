@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 class HomepageUser extends StatefulWidget {
@@ -10,9 +9,18 @@ class HomepageUser extends StatefulWidget {
 }
 
 class _HomepageUserState extends State<HomepageUser> {
-  final user = FirebaseAuth.instance.currentUser;    
-  signout() async {
-    await FirebaseAuth.instance.signOut();
+  User? user;
+  @override
+  void initState() {
+    super.initState();
+    user = FirebaseAuth.instance.currentUser;
+    FirebaseAuth.instance.authStateChanges().listen((User? newUser) {
+      if (mounted) {
+        setState(() {
+          user = newUser;
+        });
+      }
+    });
   }
 
   @override
@@ -28,11 +36,23 @@ class _HomepageUserState extends State<HomepageUser> {
             color: Colors.white,
           ),
         ),
+        backgroundColor: Colors.black,
       ),
-      body: Center(child: Text('${user!.email}')),
+      body: Center(
+        child: Text(
+          user != null
+              ? 'Signed in as: ${user!.email}'
+              : 'No user is signed in.',
+          style: TextStyle(color: Colors.white, fontSize: 16),
+        ),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: (() => signout()),
-        child: Icon(Icons.login),
+        onPressed: () async {
+          await FirebaseAuth.instance.signOut();
+          setState(() {}); // Update UI after sign out
+        },
+        backgroundColor: Colors.red,
+        child: Icon(Icons.logout),
       ),
     );
   }

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nexacare/Routes/app_routes.dart';
+import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
 import 'package:nexacare/utils/textfield.dart';
 
@@ -20,6 +21,8 @@ class _SigninUserState extends State<SigninUser> {
       email: email.text,
       password: password.text,
     );
+    // ignore: use_build_context_synchronously
+    Navigator.pushNamed(context, Approutes.wrapper);
   }
 
   bool passWordVisible = false; // Define the boolean variable
@@ -123,7 +126,9 @@ class _SigninUserState extends State<SigninUser> {
                   fontFamily: 'Font1',
                   fontSize: 15,
                 ),
-                onPressed: (() => signIn()),
+                onPressed: () {
+                  Navigator.pushNamed(context, Approutes.homepageUser);
+                },
               ),
               SizedBox(height: screenHeight * 0.05),
               // Container(
