@@ -1,4 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:nexacare/Routes/app_routes.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
 import 'package:nexacare/utils/textfield.dart';
 
@@ -10,6 +12,16 @@ class SigninUser extends StatefulWidget {
 }
 
 class _SigninUserState extends State<SigninUser> {
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
+
+  signIn() async {
+    await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email.text,
+      password: password.text,
+    );
+  }
+
   bool passWordVisible = false; // Define the boolean variable
 
   @override
@@ -37,7 +49,7 @@ class _SigninUserState extends State<SigninUser> {
               ),
               SizedBox(height: screenHeight * 0.13),
               const Text(
-                "Mobile number",
+                "Email Address",
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'Font1',
@@ -46,10 +58,11 @@ class _SigninUserState extends State<SigninUser> {
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
-                keyboardType: TextInputType.phone,
+                controller: email,
+                keyboardType: TextInputType.emailAddress,
                 decoration: TextfieldUtil.inputDecoration(
-                  hintText: "Enter your Mobile number",
-                  prefixIcon: Icons.phone,
+                  hintText: "Enter your Email address",
+                  prefixIcon: Icons.email_outlined,
                   prefixIconColor: const Color(0xff969292),
                 ),
               ),
@@ -64,6 +77,7 @@ class _SigninUserState extends State<SigninUser> {
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
+                controller: password,
                 keyboardType: TextInputType.text,
                 obscureText: passWordVisible,
                 decoration: TextfieldUtil.inputDecoration(
@@ -85,7 +99,21 @@ class _SigninUserState extends State<SigninUser> {
                   prefixIconColor: const Color(0xff969292),
                 ),
               ),
-              SizedBox(height: screenHeight * 0.04),
+              SizedBox(height: screenHeight * 0.01),
+              InkWell(
+                child: Text(
+                  "Forgot Password?",
+                  style: TextStyle(
+                    fontFamily: 'Font1',
+                    fontSize: 10,
+                    color: Colors.white,
+                  ),
+                ),
+                onTap: () {
+                  Navigator.pushNamed(context, Approutes.forgotPswd);
+                },
+              ),
+              SizedBox(height: screenHeight * 0.02),
               customElevatedButton(
                 buttonSize: Size(310, 55),
                 buttonColor: Color(0xffFFA500),
@@ -95,9 +123,9 @@ class _SigninUserState extends State<SigninUser> {
                   fontFamily: 'Font1',
                   fontSize: 15,
                 ),
-                onPressed: () {},
+                onPressed: (() => signIn()),
               ),
-              SizedBox(height: screenHeight*0.05,),
+              SizedBox(height: screenHeight * 0.05),
               // Container(
               //   height: 55,
               //   width: 310,

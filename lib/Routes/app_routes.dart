@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:nexacare/attendant/signin_attendant.dart';
+import 'package:nexacare/email/forgotpswd.dart';
 import 'package:nexacare/screens/landingpage.dart';
 import 'package:nexacare/user/signin_User.dart';
+
 class Approutes {
   static const String landingPage = '/';
   static const String signInuser = '/signInuser';
   static const String signInattendant = '/signInattendant';
+  static const String forgotPswd = '/forgotPswd';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -15,6 +18,8 @@ class Approutes {
         return MaterialPageRoute(builder: (_) => SigninUser());
       case signInattendant:
         return MaterialPageRoute(builder: (_) => SigninAttendant());
+      case forgotPswd:
+        return MaterialPageRoute(builder: (_) => Forgotpswd());
 
       default:
         return MaterialPageRoute(
