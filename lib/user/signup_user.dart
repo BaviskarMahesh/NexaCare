@@ -16,7 +16,7 @@ class _SignupUserState extends State<SignupUser> {
   TextEditingController password = TextEditingController();
 
   signUp() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email.text,
       password: password.text,
     );
@@ -98,7 +98,7 @@ class _SignupUserState extends State<SignupUser> {
                   obscureText: passWordVisible,
                   decoration: TextfieldUtil.inputDecoration(
                     hintText: "Enter your Password",
-                    
+
 
                     suffixIcon: IconButton(
                       onPressed: () {
@@ -116,24 +116,7 @@ class _SignupUserState extends State<SignupUser> {
                     prefixIconColor: const Color(0xff969292),
                   ),
                 ),
-                SizedBox(height: screenHeight * 0.01),
-                InkWell(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 180.0),
-                    child: Text(
-                      "Forgot Password?",
-                      style: TextStyle(
-                        fontFamily: 'Font1',
-                        fontSize: 13,
-                        color: Colors.white,
-                        //decoration: TextDecoration.underline,
-                      ),
-                    ),
-                  ),
-                  onTap: () {
-                    Navigator.pushNamed(context, Approutes.forgotPswd);
-                  },
-                ),
+                
                 SizedBox(height: screenHeight * 0.02),
                 customElevatedButton(
                   buttonSize: Size(310, 55),
