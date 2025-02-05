@@ -1,4 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:nexacare/Routes/app_routes.dart';
+import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
 import 'package:nexacare/utils/textfield.dart';
 
@@ -10,6 +13,18 @@ class SigninUser extends StatefulWidget {
 }
 
 class _SigninUserState extends State<SigninUser> {
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
+
+  signIn() async {
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email.text,
+      password: password.text,
+    );
+    // ignore: use_build_context_synchronously
+    Navigator.pushNamed(context, Approutes.wrapper);
+  }
+
   bool passWordVisible = false; // Define the boolean variable
 
   @override
@@ -37,7 +52,7 @@ class _SigninUserState extends State<SigninUser> {
               ),
               SizedBox(height: screenHeight * 0.13),
               const Text(
-                "Mobile number",
+                "Email Address",
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: 'Font1',
@@ -46,10 +61,11 @@ class _SigninUserState extends State<SigninUser> {
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
-                keyboardType: TextInputType.phone,
+                controller: email,
+                keyboardType: TextInputType.emailAddress,
                 decoration: TextfieldUtil.inputDecoration(
-                  hintText: "Enter your Mobile number",
-                  prefixIcon: Icons.phone,
+                  hintText: "Enter your Email address",
+                  prefixIcon: Icons.email_outlined,
                   prefixIconColor: const Color(0xff969292),
                 ),
               ),
@@ -64,6 +80,7 @@ class _SigninUserState extends State<SigninUser> {
               ),
               SizedBox(height: screenHeight * 0.01),
               TextField(
+                controller: password,
                 keyboardType: TextInputType.text,
                 obscureText: passWordVisible,
                 decoration: TextfieldUtil.inputDecoration(
@@ -85,7 +102,8 @@ class _SigninUserState extends State<SigninUser> {
                   prefixIconColor: const Color(0xff969292),
                 ),
               ),
-              SizedBox(height: screenHeight * 0.04),
+
+              SizedBox(height: screenHeight * 0.02),
               customElevatedButton(
                 buttonSize: Size(310, 55),
                 buttonColor: Color(0xffFFA500),
@@ -95,19 +113,39 @@ class _SigninUserState extends State<SigninUser> {
                   fontFamily: 'Font1',
                   fontSize: 15,
                 ),
-                onPressed: () {},
+                onPressed: (() => signIn()),
               ),
-              SizedBox(height: screenHeight*0.05,),
-              // Container(
-              //   height: 55,
-              //   width: 310,
-              //   color: Color(0xff0C0C0C),
-              //   child: Row(
-              //     children: [
-              //       Icon(Icons.google)
-              //     ],
-              //   ),
-              // )
+              SizedBox(height: screenHeight * 0.05),
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0),
+                child: Row(
+                  children: [
+                    Text(
+                      "Don't have an account?",
+                      style: TextStyle(
+                        fontFamily: 'Font1',
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(width: 3),
+                    InkWell(
+                      child: Text(
+                        "Sign up",
+                        style: TextStyle(
+                          fontFamily: 'Font1',
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xffFFA500),
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, Approutes.signupUser);
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

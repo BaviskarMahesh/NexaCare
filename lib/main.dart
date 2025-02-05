@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:nexacare/Routes/app_routes.dart';
 import 'package:nexacare/screens/landingpage.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:nexacare/utils/wrapper.dart';
+import 'package:nexacare/firebase_options.dart';
 
 class NexaCare extends StatefulWidget {
   const NexaCare({super.key});
@@ -9,7 +12,9 @@ class NexaCare extends StatefulWidget {
   State<NexaCare> createState() => _NexaCareState();
 }
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const NexaCare());
 }
 
@@ -24,6 +29,7 @@ class _NexaCareState extends State<NexaCare> {
         ),
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff0C0C0C)),
       ),
+      home: Wrapper(),
       darkTheme: ThemeData(brightness: Brightness.dark),
       debugShowCheckedModeBanner: false,
       initialRoute: Approutes.landingPage, // Set the initial route
