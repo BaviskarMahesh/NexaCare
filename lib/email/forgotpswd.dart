@@ -11,10 +11,37 @@ class Forgotpswd extends StatefulWidget {
 }
 
 class _ForgotpswdState extends State<Forgotpswd> {
-  TextEditingController email = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
-  reset() async {
-    await FirebaseAuth.instance.sendPasswordResetEmail(email: email.text);
+  Future<void> reset() async {
+    if (emailController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar
+      
+      
+      
+      (content: Text("Please enter your email.",style: TextStyle(fontFamily: 'Font1',color: Colors.white),)));
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(
+        email: emailController.text.trim(),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Color(0xff0C0C0C),
+          content: Text("Password reset email sent! Check your inbox.",style: TextStyle(fontFamily: 'Font1',color: Colors.white))),
+      );
+    } on FirebaseAuthException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(
+        
+        backgroundColor: Color(0xff0C0C0C),
+        content: Text("Error: ${e.message}",style: TextStyle(fontFamily: 'Font1',color: Colors.white))));
+    }
   }
 
   @override
@@ -39,7 +66,9 @@ class _ForgotpswdState extends State<Forgotpswd> {
         child: Column(
           children: [
             TextField(
-              keyboardType: TextInputType.phone,
+              controller: emailController, 
+              keyboardType:
+                  TextInputType.emailAddress, 
               decoration: TextfieldUtil.inputDecoration(
                 hintText: "Enter your Email address",
                 prefixIcon: Icons.email_outlined,
@@ -48,6 +77,7 @@ class _ForgotpswdState extends State<Forgotpswd> {
             ),
 
             SizedBox(height: screenHeight * 0.04),
+
             customElevatedButton(
               buttonSize: Size(310, 55),
               buttonColor: Color(0xffFFA500),
@@ -57,7 +87,7 @@ class _ForgotpswdState extends State<Forgotpswd> {
                 fontFamily: 'Font1',
                 fontSize: 15,
               ),
-              onPressed: (() => reset()),
+              onPressed: reset, 
             ),
           ],
         ),

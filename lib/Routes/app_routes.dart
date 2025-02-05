@@ -4,6 +4,7 @@ import 'package:nexacare/email/forgotpswd.dart';
 import 'package:nexacare/screens/landingpage.dart';
 import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/user/signin_User.dart';
+import 'package:nexacare/user/signup_user.dart';
 import 'package:nexacare/utils/wrapper.dart';
 
 class Approutes {
@@ -13,6 +14,7 @@ class Approutes {
   static const String forgotPswd = '/forgotPswd';
   static const String wrapper = '/wrapper';
   static const String homepageUser = '/homepageUser';
+  static const String signupUser = '/signupUser';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -28,6 +30,8 @@ class Approutes {
         return MaterialPageRoute(builder: (_) => Wrapper());
       case homepageUser:
         return MaterialPageRoute(builder: (_) => HomepageUser());
+      case signupUser:
+        return MaterialPageRoute(builder: (_) => SignupUser());
 
       default:
         return MaterialPageRoute(

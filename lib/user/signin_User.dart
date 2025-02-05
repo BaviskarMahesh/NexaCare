@@ -17,7 +17,7 @@ class _SigninUserState extends State<SigninUser> {
   TextEditingController password = TextEditingController();
 
   signIn() async {
-    await FirebaseAuth.instance.signInWithEmailAndPassword(
+    await FirebaseAuth.instance.createUserWithEmailAndPassword(
       email: email.text,
       password: password.text,
     );
@@ -102,20 +102,7 @@ class _SigninUserState extends State<SigninUser> {
                   prefixIconColor: const Color(0xff969292),
                 ),
               ),
-              SizedBox(height: screenHeight * 0.01),
-              InkWell(
-                child: Text(
-                  "Forgot Password?",
-                  style: TextStyle(
-                    fontFamily: 'Font1',
-                    fontSize: 10,
-                    color: Colors.white,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pushNamed(context, Approutes.forgotPswd);
-                },
-              ),
+
               SizedBox(height: screenHeight * 0.02),
               customElevatedButton(
                 buttonSize: Size(310, 55),
@@ -126,21 +113,39 @@ class _SigninUserState extends State<SigninUser> {
                   fontFamily: 'Font1',
                   fontSize: 15,
                 ),
-                onPressed: () {
-                  Navigator.pushNamed(context, Approutes.homepageUser);
-                },
+                onPressed: (() => signIn()),
               ),
               SizedBox(height: screenHeight * 0.05),
-              // Container(
-              //   height: 55,
-              //   width: 310,
-              //   color: Color(0xff0C0C0C),
-              //   child: Row(
-              //     children: [
-              //       Icon(Icons.google)
-              //     ],
-              //   ),
-              // )
+              Padding(
+                padding: const EdgeInsets.only(left: 40.0),
+                child: Row(
+                  children: [
+                    Text(
+                      "Don't have an account?",
+                      style: TextStyle(
+                        fontFamily: 'Font1',
+                        fontSize: 14,
+                        color: Colors.white,
+                      ),
+                    ),
+                    SizedBox(width: 3),
+                    InkWell(
+                      child: Text(
+                        "Sign up",
+                        style: TextStyle(
+                          fontFamily: 'Font1',
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xffFFA500),
+                        ),
+                      ),
+                      onTap: () {
+                        Navigator.pushNamed(context, Approutes.signupUser);
+                      },
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
