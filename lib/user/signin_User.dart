@@ -4,6 +4,7 @@ import 'package:nexacare/Routes/app_routes.dart';
 import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
 import 'package:nexacare/utils/textfield.dart';
+import 'package:animated_snack_bar/animated_snack_bar.dart';
 
 class SigninUser extends StatefulWidget {
   const SigninUser({super.key});
@@ -15,14 +16,49 @@ class SigninUser extends StatefulWidget {
 class _SigninUserState extends State<SigninUser> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
-
+  bool isLoading = false;
   signIn() async {
-    await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email.text,
-      password: password.text,
-    );
-    // ignore: use_build_context_synchronously
-    Navigator.pushNamed(context, Approutes.wrapper);
+    setState(() {
+      isLoading = true;
+    });
+    try {
+      await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email.text,
+        password: password.text,
+      );
+      Navigator.pushNamed(context, Approutes.wrapper);
+    } on FirebaseAuthException catch (e) {
+      AnimatedSnackBar.material(
+        e.code,
+        type: AnimatedSnackBarType.error,
+        duration: const Duration(seconds: 2),
+        mobilePositionSettings: const MobilePositionSettings(
+          topOnAppearance: 100,
+        ),
+        mobileSnackBarPosition: MobileSnackBarPosition.top,
+        // ignore: use_build_context_synchronously
+        desktopSnackBarPosition: DesktopSnackBarPosition.bottomLeft,
+      ).show(context);
+    } catch (e) {
+      // Display generic error message in SnackBar
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: const Color(0xff0C0C0C),
+          behavior: SnackBarBehavior.floating,
+          content: Text(
+            "Something Went wrong: $e",
+            style: const TextStyle(
+              fontFamily: 'Font1',
+              color: Color(0xffFFFFFF),
+              fontSize: 15,
+            ),
+          ),
+        ),
+      );
+    }
+    setState(() {
+      isLoading = false;
+    });
   }
 
   bool passWordVisible = false; // Define the boolean variable
@@ -31,125 +67,146 @@ class _SigninUserState extends State<SigninUser> {
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
 
-    return Scaffold(
-      backgroundColor: const Color(0xff0C0C0C),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Center(
-                child: Text(
-                  "NexaCare",
-                  style: TextStyle(
-                    fontFamily: 'Font1',
-                    color: Color(0xffFFFFFF),
-                    fontSize: 30,
-                  ),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.13),
-              const Text(
-                "Email Address",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Font1',
-                  fontSize: 15,
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.01),
-              TextField(
-                controller: email,
-                keyboardType: TextInputType.emailAddress,
-                decoration: TextfieldUtil.inputDecoration(
-                  hintText: "Enter your Email address",
-                  prefixIcon: Icons.email_outlined,
-                  prefixIconColor: const Color(0xff969292),
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.02),
-              const Text(
-                "Password",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontFamily: 'Font1',
-                  fontSize: 15,
-                ),
-              ),
-              SizedBox(height: screenHeight * 0.01),
-              TextField(
-                controller: password,
-                keyboardType: TextInputType.text,
-                obscureText: passWordVisible,
-                decoration: TextfieldUtil.inputDecoration(
-                  hintText: "Enter your Password",
-
-                  suffixIcon: IconButton(
-                    onPressed: () {
-                      setState(() {
-                        passWordVisible = !passWordVisible;
-                      });
-                    },
-                    icon: Icon(
-                      passWordVisible
-                          ? Icons.visibility_off_outlined
-                          : Icons.visibility_outlined,
-                      color: Color(0xff969292),
-                    ),
-                  ),
-                  prefixIconColor: const Color(0xff969292),
-                ),
-              ),
-
-              SizedBox(height: screenHeight * 0.02),
-              customElevatedButton(
-                buttonSize: Size(310, 55),
-                buttonColor: Color(0xffFFA500),
-                text: "Sign In",
-                textStyle: TextStyle(
-                  color: Color(0xff000000),
-                  fontFamily: 'Font1',
-                  fontSize: 15,
-                ),
-                onPressed: (() => signIn()),
-              ),
-              SizedBox(height: screenHeight * 0.05),
-              Padding(
-                padding: const EdgeInsets.only(left: 40.0),
-                child: Row(
-                  children: [
-                    Text(
-                      "Don't have an account?",
+    return isLoading
+        ? Center(
+          child: CircularProgressIndicator(
+            valueColor: AlwaysStoppedAnimation<Color>(Color(0xffFFA500)),
+          ),
+        )
+        : Scaffold(
+          backgroundColor: const Color(0xff0C0C0C),
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Center(
+                    child: Text(
+                      "NexaCare",
                       style: TextStyle(
                         fontFamily: 'Font1',
-                        fontSize: 14,
-                        color: Colors.white,
+                        color: Color(0xffFFFFFF),
+                        fontSize: 30,
                       ),
                     ),
-                    SizedBox(width: 3),
-                    InkWell(
-                      child: Text(
-                        "Sign up",
-                        style: TextStyle(
-                          fontFamily: 'Font1',
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xffFFA500),
+                  ),
+                  SizedBox(height: screenHeight * 0.04),
+                  const Text(
+                    "Email Address",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Font1',
+                      fontSize: 15,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.01),
+                  TextField(
+                    controller: email,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: TextfieldUtil.inputDecoration(
+                      hintText: "Enter your Email address",
+                      prefixIcon: Icons.email_outlined,
+                      prefixIconColor: const Color(0xff969292),
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  const Text(
+                    "Password",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontFamily: 'Font1',
+                      fontSize: 15,
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.01),
+                  TextField(
+                    controller: password,
+                    keyboardType: TextInputType.text,
+                    obscureText: passWordVisible,
+                    decoration: TextfieldUtil.inputDecoration(
+                      hintText: "Enter your Password",
+                      suffixIcon: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            passWordVisible = !passWordVisible;
+                          });
+                        },
+                        icon: Icon(
+                          passWordVisible
+                              ? Icons.visibility_off_outlined
+                              : Icons.visibility_outlined,
+                          color: const Color(0xff969292),
                         ),
                       ),
-                      onTap: () {
-                        Navigator.pushNamed(context, Approutes.signupUser);
-                      },
+                      prefixIconColor: const Color(0xff969292),
                     ),
-                  ],
-                ),
+                  ),
+                  SizedBox(height: screenHeight * 0.01),
+                  InkWell(
+                    child: const Padding(
+                      padding: EdgeInsets.only(left: 180.0),
+                      child: Text(
+                        "Forgot Password?",
+                        style: TextStyle(
+                          fontFamily: 'Font1',
+                          fontSize: 13,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    onTap: () {
+                      Navigator.pushNamed(context, Approutes.forgotPswd);
+                    },
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
+                  customElevatedButton(
+                    buttonSize: const Size(310, 55),
+                    buttonColor: const Color(0xffFFA500),
+                    text: "Sign In",
+                    textStyle: const TextStyle(
+                      color: Color(0xff000000),
+                      fontFamily: 'Font1',
+                      fontSize: 15,
+                    ),
+                    onPressed: signIn,
+                  ),
+                  SizedBox(height: screenHeight * 0.05),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 40.0),
+                    child: Row(
+                      children: [
+                        const Text(
+                          "Don't have an account?",
+                          style: TextStyle(
+                            fontFamily: 'Font1',
+                            fontSize: 14,
+                            color: Colors.white,
+                          ),
+                        ),
+                        const SizedBox(width: 3),
+                        InkWell(
+                          child: const Text(
+                            "Sign up",
+                            style: TextStyle(
+                              fontFamily: 'Font1',
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xffFFA500),
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.pushNamed(context, Approutes.signupUser);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        );
   }
 }

@@ -87,7 +87,7 @@ class _VerifyemailState extends State<Verifyemail> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.red,
+        backgroundColor: Color(0XffFFA500),
         onPressed: reload,
         child: const Icon(Icons.restart_alt_outlined),
       ),
