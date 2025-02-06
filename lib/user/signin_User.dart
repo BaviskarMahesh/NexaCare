@@ -89,6 +89,7 @@ class _SigninUserState extends State<SigninUser> {
                         fontFamily: 'Font1',
                         color: Color(0xffFFFFFF),
                         fontSize: 30,
+                        
                       ),
                     ),
                   ),
