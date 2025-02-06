@@ -5,6 +5,7 @@ import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
 import 'package:nexacare/utils/textfield.dart';
 import 'package:animated_snack_bar/animated_snack_bar.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SigninUser extends StatefulWidget {
   const SigninUser({super.key});
@@ -17,6 +18,19 @@ class _SigninUserState extends State<SigninUser> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
   bool isLoading = false;
+
+  login() async {
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final GoogleSignInAuthentication? googleAuth =
+        await googleUser?.authentication;
+
+    final credential = GoogleAuthProvider.credential(
+      accessToken: googleAuth?.accessToken,
+      idToken: googleAuth?.idToken,
+    );
+    await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
   signIn() async {
     setState(() {
       isLoading = true;
@@ -89,7 +103,6 @@ class _SigninUserState extends State<SigninUser> {
                         fontFamily: 'Font1',
                         color: Color(0xffFFFFFF),
                         fontSize: 30,
-                        
                       ),
                     ),
                   ),
@@ -174,6 +187,12 @@ class _SigninUserState extends State<SigninUser> {
                     onPressed: signIn,
                   ),
                   SizedBox(height: screenHeight * 0.05),
+                  customElevatedButton(buttonSize: const Size(310, 55),
+                  buttonColor: Color(0xff969292),
+                  text:  "Sign in with Google",textStyle: TextStyle(
+                    color: Colors.white,
+                    
+                  ), onPressed: ( ()=>login())),
                   Padding(
                     padding: const EdgeInsets.only(left: 40.0),
                     child: Row(
