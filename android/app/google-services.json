@@ -12,7 +12,20 @@
           "package_name": "com.example.nexacare"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "899597567245-gt88e1485c0e18tuf8of5pdtnirca8bb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nexacare",
+            "certificate_hash": "a278732c1d467d0ee6b065d61aa30ef63ea4f905"
+          }
+        },
+        {
+          "client_id": "899597567245-4u8cfub1ogu68j113108hl20h87lsoju.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyDZXImq2LnYbo_x_D_sNXb7ZX-zlEuh2vg"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "899597567245-4u8cfub1ogu68j113108hl20h87lsoju.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "899597567245-gn5tapc4mju5vroga0chjqm2pudp3buq.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.nexacare"
+              }
+            }
+          ]
         }
       }
     }

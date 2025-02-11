@@ -5,7 +5,7 @@ import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
 import 'package:nexacare/utils/textfield.dart';
 import 'package:animated_snack_bar/animated_snack_bar.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+// import 'package:google_sign_in/google_sign_in.dart';
 
 class SigninUser extends StatefulWidget {
   const SigninUser({super.key});
@@ -19,17 +19,17 @@ class _SigninUserState extends State<SigninUser> {
   TextEditingController password = TextEditingController();
   bool isLoading = false;
 
-  login() async {
-    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-    final GoogleSignInAuthentication? googleAuth =
-        await googleUser?.authentication;
+  // login() async {
+  //  // final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  //  // final GoogleSignInAuthentication? googleAuth =
+  //       await googleUser?.authentication;
 
-    final credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth?.accessToken,
-      idToken: googleAuth?.idToken,
-    );
-    await FirebaseAuth.instance.signInWithCredential(credential);
-  }
+  //   final credential = GoogleAuthProvider.credential(
+  //     accessToken: googleAuth?.accessToken,
+  //     idToken: googleAuth?.idToken,
+  //   );
+  //   await FirebaseAuth.instance.signInWithCredential(credential);
+  // }
 
   signIn() async {
     setState(() {
@@ -192,7 +192,7 @@ class _SigninUserState extends State<SigninUser> {
                   text:  "Sign in with Google",textStyle: TextStyle(
                     color: Colors.white,
                     
-                  ), onPressed: ( ()=>login())),
+                  ), onPressed: ( ()=>signIn())),
                   Padding(
                     padding: const EdgeInsets.only(left: 40.0),
                     child: Row(
