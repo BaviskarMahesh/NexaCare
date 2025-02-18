@@ -5,7 +5,7 @@ import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
 import 'package:nexacare/utils/textfield.dart';
 import 'package:animated_snack_bar/animated_snack_bar.dart';
-// import 'package:google_sign_in/google_sign_in.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class SigninUser extends StatefulWidget {
   const SigninUser({super.key});
@@ -18,17 +18,37 @@ class _SigninUserState extends State<SigninUser> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
   bool isLoading = false;
-
   // login() async {
-  //  // final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
-  //  // final GoogleSignInAuthentication? googleAuth =
-  //       await googleUser?.authentication;
+  //   try {
+  //     final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+  //     if (googleUser == null) {
+  //       // The user canceled the login
+  //       return;
+  //     }
 
-  //   final credential = GoogleAuthProvider.credential(
-  //     accessToken: googleAuth?.accessToken,
-  //     idToken: googleAuth?.idToken,
-  //   );
-  //   await FirebaseAuth.instance.signInWithCredential(credential);
+  //     final GoogleSignInAuthentication googleAuth =
+  //         await googleUser.authentication;
+  //     final credential = GoogleAuthProvider.credential(
+  //       accessToken: googleAuth.accessToken,
+  //       idToken: googleAuth.idToken,
+  //     );
+
+  //     await FirebaseAuth.instance.signInWithCredential(credential);
+  //     // Navigate to home page or wherever you need after successful login
+  //     Navigator.pushReplacementNamed(context, Approutes.wrapper);
+  //   } catch (e) {
+  //     // Handle the error
+  //     print("Error during Google sign-in: $e");
+  //     AnimatedSnackBar.material(
+  //       "Google Sign-in failed",
+  //       type: AnimatedSnackBarType.error,
+  //       duration: const Duration(seconds: 2),
+  //       mobilePositionSettings: const MobilePositionSettings(
+  //         topOnAppearance: 100,
+  //       ),
+  //       mobileSnackBarPosition: MobileSnackBarPosition.top,
+  //     ).show(context);
+  //   }
   // }
 
   signIn() async {
@@ -44,6 +64,7 @@ class _SigninUserState extends State<SigninUser> {
     } on FirebaseAuthException catch (e) {
       AnimatedSnackBar.material(
         e.code,
+
         type: AnimatedSnackBarType.error,
         duration: const Duration(seconds: 2),
         mobilePositionSettings: const MobilePositionSettings(
@@ -106,7 +127,7 @@ class _SigninUserState extends State<SigninUser> {
                       ),
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.04),
+                  SizedBox(height: screenHeight * 0.08),
                   const Text(
                     "Email Address",
                     style: TextStyle(
@@ -186,13 +207,18 @@ class _SigninUserState extends State<SigninUser> {
                     ),
                     onPressed: signIn,
                   ),
-                  SizedBox(height: screenHeight * 0.05),
-                  customElevatedButton(buttonSize: const Size(310, 55),
-                  buttonColor: Color(0xff969292),
-                  text:  "Sign in with Google",textStyle: TextStyle(
-                    color: Colors.white,
-                    
-                  ), onPressed: ( ()=>signIn())),
+                  SizedBox(height: screenHeight * 0.15),
+                  customElevatedButton(
+                    buttonSize: const Size(310, 55),
+                    buttonColor: Color(0xff312F2F),
+                    text: "Sign in with Google",
+                    textStyle: TextStyle(
+                      fontFamily: 'Font1',
+                      color: Colors.white,
+                    ),
+                    onPressed: (() => signIn()),
+                  ),
+                  SizedBox(height: screenHeight * 0.02),
                   Padding(
                     padding: const EdgeInsets.only(left: 40.0),
                     child: Row(

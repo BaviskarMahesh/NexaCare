@@ -1,12 +1,10 @@
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
     repositories {
-        // google()         // Add this
-        // mavenCentral()   // Add this
+        google()
+        mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.3.0'
-         classpath 'com.google.gms:google-services:4.3.10'  // Use AGP 8.3.0 or later
+        classpath 'com.android.tools.build:gradle:8.1.1'
     }
 }
 
@@ -18,11 +16,9 @@ allprojects {
 }
 
 rootProject.buildDir = "../build"
-
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
-
 subprojects {
     project.evaluationDependsOn(":app")
 }
