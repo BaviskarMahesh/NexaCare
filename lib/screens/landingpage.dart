@@ -53,7 +53,9 @@ class _LandingpageState extends State<Landingpage> {
                 fontFamily: 'Font1',
               ),
               onPressed: () {
-                Navigator.pushNamed(context, Approutes.signInuser);
+                Navigator.pushNamed(context, Approutes.signInuser,
+                arguments:'user',
+                );
               },
               buttonSize: const Size(300, 55),
             ),

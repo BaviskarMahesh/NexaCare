@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:nexacare/Routes/app_routes.dart';
 import 'package:nexacare/utils/dropdown.dart';
@@ -38,8 +41,16 @@ class _UserHealthdetailsState extends State<UserHealthdetails> {
   }
 
   Future<void> addUserDetails(BuildContext context) async {
-    List<String> emptyFields = [];
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      log("❌ No user logged in");
+      return;
+    }
 
+    String uid = user.uid;
+
+    // Check for empty fields
+    List<String> emptyFields = [];
     if (nameController.text.trim().isEmpty) emptyFields.add("Name");
     if (dobController.text.trim().isEmpty) emptyFields.add("Date of Birth");
     if (bloodContrller.text.trim().isEmpty) emptyFields.add("Blood Group");
@@ -57,20 +68,41 @@ class _UserHealthdetailsState extends State<UserHealthdetails> {
         ),
         mobileSnackBarPosition: MobileSnackBarPosition.top,
       ).show(context);
-      return; // Stop further execution if validation fails
+      return;
     }
 
     try {
-      UserModel user = UserModel(
-        name: nameController.text.trim(),
-        dateOfBirth: dobController.text.trim(),
-        bloodGroup: bloodContrller.text.trim(),
-        gender: genderContrller.text.trim(),
-        height: double.tryParse(selectedHeight.replaceAll(" cm", "")) ?? 0.0,
-        weight: double.tryParse(selectedWeight.replaceAll(" kg", "")) ?? 0.0,
-      );
+      // Fetch existing user data
+      DocumentSnapshot userDoc =
+          await FirebaseFirestore.instance.collection("User").doc(uid).get();
 
-      await FirebaseFirestore.instance.collection('User').add(user.toMap());
+      Map<String, dynamic> existingData =
+          userDoc.exists ? userDoc.data() as Map<String, dynamic> : {};
+
+      // Merge new user details with existing Firestore data
+      Map<String, dynamic> updatedData = {
+        "name": nameController.text.trim(),
+        "dateOfBirth": dobController.text.trim(),
+        "bloodGroup": bloodContrller.text.trim(),
+        "gender": genderContrller.text.trim(),
+        "height": double.tryParse(selectedHeight.replaceAll(" cm", "")) ?? 0.0,
+        "weight": double.tryParse(selectedWeight.replaceAll(" kg", "")) ?? 0.0,
+
+        // Preserve existing location details if available
+        "city": existingData["city"] ?? "",
+        "latitude": existingData["latitude"] ?? 0.0,
+        "longitude": existingData["longitude"] ?? 0.0,
+        "locationUpdatedAt": existingData["locationUpdatedAt"] ?? null,
+      };
+
+      // Save data to Firestore
+      await FirebaseFirestore.instance
+          .collection('User')
+          .doc(uid)
+          .set(
+            updatedData,
+            SetOptions(merge: true),
+          ); // ✅ Merging ensures location isn't erased
 
       AnimatedSnackBar.material(
         "Health details saved successfully!",
@@ -82,6 +114,7 @@ class _UserHealthdetailsState extends State<UserHealthdetails> {
         mobileSnackBarPosition: MobileSnackBarPosition.top,
       ).show(context);
 
+      // Navigate to location permission screen
       Future.delayed(Duration(seconds: 2), () {
         Navigator.pushNamed(context, Approutes.userlocationpermission);
       });
@@ -362,6 +395,10 @@ class _UserHealthdetailsState extends State<UserHealthdetails> {
                   ),
                   onPressed: () {
                     addUserDetails(context);
+                    Navigator.pushNamed(
+                      context,
+                      Approutes.userlocationpermission,
+                    );
                   },
                 ),
                 SizedBox(height: screenHeight * 0.02),

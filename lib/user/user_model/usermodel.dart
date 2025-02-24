@@ -7,6 +7,10 @@ class UserModel {
   String gender;
   double height;
   double weight;
+  String city;
+  double latitude;
+  double longitude;
+  Timestamp? locationUpdatedAt; // Firestore timestamp
 
   UserModel({
     required this.name,
@@ -15,9 +19,13 @@ class UserModel {
     required this.gender,
     required this.height,
     required this.weight,
+    this.city = "",
+    this.latitude = 0.0,
+    this.longitude = 0.0,
+    this.locationUpdatedAt,
   });
 
-  //json format
+  // Convert UserModel to Firestore format (Map)
   Map<String, dynamic> toMap() {
     return {
       'name': name,
@@ -26,18 +34,26 @@ class UserModel {
       'gender': gender,
       'height': height,
       'weight': weight,
+      'city': city,
+      'latitude': latitude,
+      'longitude': longitude,
+      'locationUpdatedAt': locationUpdatedAt,
     };
   }
 
+  // Convert Firestore document to UserModel
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      name: map['name'] ?? ' ',
-      dateOfBirth: map['dateOfBirth'] ?? ' ',
-      bloodGroup: map['bloodGroup'] ?? ' ',
-      gender: map['gender'] ?? ' ' ,
-      height:(map['height']??0.0).toDouble(),
-      weight:(map['weight']??0.0).toDouble(),
-
+      name: map['name'] ?? '',
+      dateOfBirth: map['dateOfBirth'] ?? '',
+      bloodGroup: map['bloodGroup'] ?? '',
+      gender: map['gender'] ?? '',
+      height: (map['height'] ?? 0.0).toDouble(),
+      weight: (map['weight'] ?? 0.0).toDouble(),
+      city: map['city'] ?? '',
+      latitude: (map['latitude'] ?? 0.0).toDouble(),
+      longitude: (map['longitude'] ?? 0.0).toDouble(),
+      locationUpdatedAt: map['locationUpdatedAt'],
     );
   }
 }

@@ -39,7 +39,7 @@ class Approutes {
       case userHealthDetails:
         return MaterialPageRoute(builder: (_) => UserHealthdetails());
       case userlocationpermission:
-        return MaterialPageRoute(builder: (_) => UserLocationpermission());
+        return MaterialPageRoute(builder: (_) => UserLocationPermission());
 
       default:
         return MaterialPageRoute(
