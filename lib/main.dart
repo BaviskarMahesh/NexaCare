@@ -28,6 +28,7 @@ class _NexaCareState extends State<NexaCare> {
           cursorColor: Color(0xff969292),
         ),
         colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff0C0C0C)),
+        dialogTheme: DialogThemeData(backgroundColor: Color(0xff0C0C0C)),
       ),
       home: Wrapper(),
       darkTheme: ThemeData(brightness: Brightness.dark),

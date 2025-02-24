@@ -3,8 +3,10 @@ import 'package:nexacare/attendant/signin_attendant.dart';
 import 'package:nexacare/email/forgotpswd.dart';
 import 'package:nexacare/screens/landingpage.dart';
 import 'package:nexacare/user/homepage_user.dart';
+import 'package:nexacare/user/location/user_locationpermission.dart';
 import 'package:nexacare/user/signin_User.dart';
 import 'package:nexacare/user/signup_user.dart';
+import 'package:nexacare/user/user_healthdetails.dart';
 import 'package:nexacare/utils/wrapper.dart';
 
 class Approutes {
@@ -15,6 +17,8 @@ class Approutes {
   static const String wrapper = '/wrapper';
   static const String homepageUser = '/homepageUser';
   static const String signupUser = '/signupUser';
+  static const String userHealthDetails = '/userHealthDetails';
+  static const String userlocationpermission = '/userlocationpermission';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -32,6 +36,10 @@ class Approutes {
         return MaterialPageRoute(builder: (_) => HomepageUser());
       case signupUser:
         return MaterialPageRoute(builder: (_) => SignupUser());
+      case userHealthDetails:
+        return MaterialPageRoute(builder: (_) => UserHealthdetails());
+      case userlocationpermission:
+        return MaterialPageRoute(builder: (_) => UserLocationpermission());
 
       default:
         return MaterialPageRoute(

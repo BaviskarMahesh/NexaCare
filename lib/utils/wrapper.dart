@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nexacare/email/verifyEmail.dart';
 import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/user/signin_User.dart';
+import 'package:nexacare/user/user_healthdetails.dart';
 
 class Wrapper extends StatefulWidget {
   const Wrapper({super.key});
@@ -31,7 +32,7 @@ class _WrapperState extends State<Wrapper> {
           // Check user authentication state
           if (snapshot.hasData) {
             return snapshot.data!.emailVerified
-                ? HomepageUser()
+                ? UserHealthdetails()
                 : Verifyemail();
           } else {
             return SigninUser();
