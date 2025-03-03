@@ -19,10 +19,13 @@ class _HomepageUserState extends State<HomepageUser> {
   int _selectedIndex = 0; // Default to home (SOS)
   Color _fabColor = const Color(0xffFFA500); // Default FAB color
 
+  String _userName = "User";
+  String _userLocation = "No Location Info";
+
   final List<Widget> _screens = [
     NearAttendant(),
     LivelocationPage(),
-    Chatbox(),
+    ChatBox(),
     UserProfile(),
   ];
 
@@ -37,6 +40,26 @@ class _HomepageUserState extends State<HomepageUser> {
         });
       }
     });
+
+    _fetchUserData();
+  }
+
+  void _fetchUserData() {
+    if (user != null) {
+      FirebaseFirestore.instance
+          .collection('User')
+          .doc(user!.uid)
+          .snapshots()
+          .listen((DocumentSnapshot snapshot) {
+            if (snapshot.exists) {
+              setState(() {
+                _userName = snapshot['name'] ?? 'User';
+                _userLocation =
+                    snapshot['locationDetail'] ?? 'No Location Info';
+              });
+            }
+          });
+    }
   }
 
   void _onTabSelected(int index) {
@@ -66,53 +89,34 @@ class _HomepageUserState extends State<HomepageUser> {
     return Scaffold(
       backgroundColor: const Color(0xff0C0C0C),
 
-      appBar: AppBar(
-        title: StreamBuilder<DocumentSnapshot>(
-          stream:
-              FirebaseFirestore.instance
-                  .collection('User')
-                  .doc(user?.uid)
-                  .snapshots(),
-          builder: (context, snapshot) {
-            if (!snapshot.hasData ||
-                snapshot.data == null ||
-                !snapshot.data!.exists) {
-              return const Text(
-                'Loading data... Please wait...',
-                style: TextStyle(
-                  fontFamily: 'Font1',
-                  fontSize: 12,
-                  color: Colors.white,
+      // Show AppBar only on SOS screen (index == 0)
+      appBar:
+          _selectedIndex == 0
+              ? AppBar(
+                title: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: <Widget>[
+                    Text(
+                      "Hi, $_userName",
+                      style: const TextStyle(
+                        fontFamily: 'Font1',
+                        fontSize: 15,
+                        color: Colors.white,
+                      ),
+                    ),
+                    Text(
+                      _userLocation,
+                      style: const TextStyle(
+                        fontFamily: 'Font1',
+                        fontSize: 12,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ],
                 ),
-              );
-            }
-
-            var userData = snapshot.data!;
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Text(
-                  "Hi, ${userData['name'] ?? 'User'}",
-                  style: const TextStyle(
-                    fontFamily: 'Font1',
-                    fontSize: 15,
-                    color: Colors.white,
-                  ),
-                ),
-                Text(
-                  userData['locationDetail'] ?? 'No Location Info',
-                  style: const TextStyle(
-                    fontFamily: 'Font1',
-                    fontSize: 12,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-        backgroundColor: const Color(0xff0C0C0C),
-      ),
+                backgroundColor: const Color(0xff0C0C0C),
+              )
+              : null, // Hide AppBar for other screens
 
       body:
           _selectedIndex == 0
@@ -139,7 +143,7 @@ class _HomepageUserState extends State<HomepageUser> {
                   ),
                 ),
               )
-              : IndexedStack(index: _selectedIndex - 1, children: _screens),
+              : _screens[_selectedIndex - 1], // Display other screens
 
       floatingActionButton: Container(
         decoration: BoxDecoration(

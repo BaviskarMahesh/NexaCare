@@ -18,7 +18,6 @@ class UserLocationPermission extends StatefulWidget {
 
 class _UserLocationPermissionState extends State<UserLocationPermission> {
   String cityName = "Unknown";
-  String colonyName = "Unknown";
   double latitude = 0.0;
   double longitude = 0.0;
   bool isUpdating = false;
@@ -31,38 +30,61 @@ class _UserLocationPermissionState extends State<UserLocationPermission> {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
       log.e("❌ No user logged in");
+      setState(() {
+        isUpdating = false;
+      });
       return;
     }
 
-    String uid = user.uid;
-
     try {
-      bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!isLocationEnabled) {
-        log.w("⚠️ Location services are disabled.");
-        return;
-      }
-
+      // Check & Request Location Permission
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
-        if (permission == LocationPermission.denied) {
-          log.w("⚠️ Location permission denied.");
-          return;
-        }
       }
       if (permission == LocationPermission.deniedForever) {
-        log.w("⛔ Location permission is permanently denied.");
+        log.w("⛔ Location permission permanently denied.");
+        showErrorSnackBar("Location permission permanently denied.");
+        setState(() {
+          isUpdating = false;
+        });
+        return;
+      }
+      if (permission == LocationPermission.denied) {
+        log.w("⚠️ Location permission denied.");
+        showErrorSnackBar("Location permission denied.");
+        setState(() {
+          isUpdating = false;
+        });
         return;
       }
 
-      Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.best,
-      );
+      // Check if location services are enabled
+      bool isLocationEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!isLocationEnabled) {
+        log.w("⚠️ Location services are disabled.");
+        showErrorSnackBar("Enable location services to continue.");
+        setState(() {
+          isUpdating = false;
+        });
+        return;
+      }
+
+      // Get Last Known Location First (for faster access)
+      Position? position = await Geolocator.getLastKnownPosition();
+
+      if (position == null) {
+        // Fetching fresh location with a timeout
+        position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+          timeLimit: const Duration(seconds: 10), // Timeout
+        );
+      }
 
       double lat = position.latitude;
       double lng = position.longitude;
 
+      // Get Address from Coordinates
       List<Placemark> placemarks = await placemarkFromCoordinates(lat, lng);
       Placemark place = placemarks.isNotEmpty ? placemarks.first : Placemark();
 
@@ -72,18 +94,19 @@ class _UserLocationPermissionState extends State<UserLocationPermission> {
 
       log.i("📍 Location: $colony, $city, $country");
 
+      String locationDetail =
+          (colony.isNotEmpty && city.isNotEmpty)
+              ? "$colony, $city"
+              : city.isNotEmpty
+              ? city
+              : "Unknown Location";
+
+      // Update Firestore Database
+      String uid = user.uid;
       DocumentSnapshot userDoc =
           await FirebaseFirestore.instance.collection("User").doc(uid).get();
       Map<String, dynamic> existingData =
           userDoc.exists ? userDoc.data() as Map<String, dynamic> : {};
-      String locationDetail;
-      if (colony.isNotEmpty && city.isNotEmpty) {
-        locationDetail = "$colony, $city";
-      } else if (city.isNotEmpty) {
-        locationDetail = city;
-      } else {
-        locationDetail = "Unknown Location";
-      }
 
       Map<String, dynamic> updatedData = {
         "locationDetail": locationDetail,
@@ -112,64 +135,49 @@ class _UserLocationPermissionState extends State<UserLocationPermission> {
       });
 
       log.i("✅ Location updated successfully!");
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Color(0xff0C0C0C),
-          content: Text(
-            "Location updated successfully!",
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Font1',
-              fontSize: 15,
-            ),
-          ),
-        ),
-      );
-
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) {
-          return Center(child: CircularProgressIndicator(color: Colors.white));
-        },
-      );
+      showSuccessSnackBar("Location updated successfully!");
 
       Future.delayed(Duration(seconds: 1), () {
-        Navigator.pop(context);
-        Navigator.pushNamed(context, Approutes.homepageUser);
+        Navigator.pushReplacementNamed(context, Approutes.homepageUser);
       });
     } catch (e) {
       log.e("❌ Failed to update location: $e");
+      showErrorSnackBar("Failed to update location.");
       setState(() {
-        isUpdating = false;
+        isUpdating = false; // Ensure this runs even on errors
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "Failed to update location: $e",
-            style: TextStyle(
-              color: Colors.white,
-              fontFamily: 'Font1',
-              fontSize: 15,
-            ),
-          ),
-        ),
-      );
     }
+  }
+
+  void showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
-      backgroundColor: Color(0xff0C0C0C),
+      backgroundColor: const Color(0xff0C0C0C),
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "Location Permission",
           style: TextStyle(fontFamily: 'Font1', fontSize: 20),
         ),
-        backgroundColor: Color(0xff0C0C0C),
+        backgroundColor: const Color(0xff0C0C0C),
       ),
       body: Center(
         child: Padding(
@@ -179,10 +187,10 @@ class _UserLocationPermissionState extends State<UserLocationPermission> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: screenHeight * 0.02),
-              Center(
+              const Center(
                 child: Icon(Icons.location_pin, size: 60, color: Colors.white),
               ),
-              Center(
+              const Center(
                 child: Text(
                   "Location Access",
                   style: TextStyle(
@@ -192,18 +200,17 @@ class _UserLocationPermissionState extends State<UserLocationPermission> {
                   ),
                 ),
               ),
-              
               SizedBox(height: screenHeight * 0.6),
               customElevatedButton(
                 text: isUpdating ? "Updating..." : "Enable Location",
-                textStyle: TextStyle(
+                textStyle: const TextStyle(
                   color: Colors.black,
                   fontFamily: 'Font1',
                   fontSize: 15,
                 ),
-                onPressed: isUpdating ? () {} : updateUserLocation,
-                buttonColor: Color(0xffFFA500),
-                buttonSize: Size(310, 55),
+                onPressed: isUpdating ? null : () => updateUserLocation(),
+                buttonColor: const Color(0xffFFA500),
+                buttonSize: const Size(310, 55),
                 splashColor: Colors.white.withOpacity(0.3),
               ),
             ],

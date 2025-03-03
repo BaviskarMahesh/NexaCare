@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 
 ElevatedButton customElevatedButton({
   required String text,
-  required VoidCallback onPressed,
+  VoidCallback? onPressed, // Made nullable
   Color? buttonColor,
   TextStyle? textStyle,
   Size? buttonSize,
-  Color? splashColor, 
+  Color? splashColor,
 }) {
   return ElevatedButton(
-    onPressed: onPressed,
+    onPressed: onPressed, // Accepts null now
     style: ElevatedButton.styleFrom(
       backgroundColor: buttonColor ?? const Color(0xff312F2F),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

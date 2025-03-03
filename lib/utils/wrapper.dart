@@ -14,7 +14,36 @@ class Wrapper extends StatefulWidget {
 }
 
 class _WrapperState extends State<Wrapper> {
-  Future<bool> isUserDetailsFilled(String uid) async {
+  @override
+  void initState() {
+    super.initState();
+    _checkUserState();
+  }
+
+  /// Function to check user authentication and navigate accordingly
+  Future<void> _checkUserState() async {
+    await Future.delayed(
+      const Duration(milliseconds: 500),
+    ); // Small delay to prevent flickering
+
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      _navigateTo(const SigninUser());
+    } else if (!user.emailVerified) {
+      _navigateTo(const Verifyemail());
+    } else {
+      bool detailsFilled = await _isUserDetailsFilled(user.uid);
+      if (detailsFilled) {
+        _navigateTo(const HomepageUser());
+      } else {
+        _navigateTo(const UserHealthdetails());
+      }
+    }
+  }
+
+  /// Function to check if user health details are filled
+  Future<bool> _isUserDetailsFilled(String uid) async {
     try {
       DocumentSnapshot userDoc =
           await FirebaseFirestore.instance.collection("User").doc(uid).get();
@@ -47,52 +76,22 @@ class _WrapperState extends State<Wrapper> {
     }
   }
 
+  /// Function to navigate to a new screen and clear previous stack
+  void _navigateTo(Widget screen) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => screen),
+        (route) => false, // Clears all previous routes
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder<User?>(
-        stream: FirebaseAuth.instance.authStateChanges(),
-        builder: (context, snapshot) {
-          // Loading state
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          }
-
-          // Error state
-          if (snapshot.hasError) {
-            return Center(child: Text("Something went wrong"));
-          }
-
-          // Check user authentication state
-          if (snapshot.hasData) {
-            User user = snapshot.data!;
-            if (!user.emailVerified) {
-              return Verifyemail();
-            }
-
-            // Check if the user has filled location & health details
-            return FutureBuilder<bool>(
-              future: isUserDetailsFilled(user.uid),
-              builder: (context, AsyncSnapshot<bool> userDetailsSnapshot) {
-                if (userDetailsSnapshot.connectionState ==
-                    ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                }
-
-                if (userDetailsSnapshot.hasError ||
-                    !userDetailsSnapshot.hasData ||
-                    !userDetailsSnapshot.data!) {
-                  return UserHealthdetails();
-                }
-
-                return HomepageUser();
-              },
-            );
-          } else {
-            return SigninUser();
-          }
-        },
-      ),
+    // Show a loading screen while checking authentication
+    return const Scaffold(
+      body: Center(child: CircularProgressIndicator(color: Color(0xffFFA500))),
     );
   }
 }
