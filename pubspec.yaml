@@ -31,6 +31,7 @@ dependencies:
   geolocator: ^13.0.2
   geocoding: ^3.0.0
   logger: ^2.5.0
+  google_maps_flutter: ^2.10.1
   
   #google_sign_in: ^6.2.2
 
