@@ -7,6 +7,8 @@ import 'package:nexacare/user/location/livelocation_page.dart';
 import 'package:nexacare/user/profile/user_profile.dart';
 import 'package:nexacare/utils/navbar.dart';
 
+import 'dart:async';
+
 class HomepageUser extends StatefulWidget {
   const HomepageUser({super.key});
 
@@ -14,10 +16,11 @@ class HomepageUser extends StatefulWidget {
   State<HomepageUser> createState() => _HomepageUserState();
 }
 
-class _HomepageUserState extends State<HomepageUser> {
+class _HomepageUserState extends State<HomepageUser>
+    with TickerProviderStateMixin {
   User? user;
-  int _selectedIndex = 0; // Default to home (SOS)
-  Color _fabColor = const Color(0xffFFA500); // Default FAB color
+  int _selectedIndex = 0;
+  Color _fabColor = const Color(0xffFFA500);
 
   String _userName = "User";
   String _userLocation = "No Location Info";
@@ -25,9 +28,16 @@ class _HomepageUserState extends State<HomepageUser> {
   final List<Widget> _screens = [
     NearAttendant(),
     LivelocationPage(),
-    ChatBox(),
+    Chatbox(),
     UserProfile(),
   ];
+
+  late AnimationController _controller;
+  late Animation<double> _borderAnimation;
+  int countdown = 5;
+  bool isPressed = false;
+  Timer? countdownTimer;
+  Color buttonColor = Color(0xffFFA500);
 
   @override
   void initState() {
@@ -42,6 +52,13 @@ class _HomepageUserState extends State<HomepageUser> {
     });
 
     _fetchUserData();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 1),
+    )..repeat(reverse: true);
+
+    _borderAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(_controller);
   }
 
   void _fetchUserData() {
@@ -70,11 +87,10 @@ class _HomepageUserState extends State<HomepageUser> {
 
   void _onFabPressed() {
     setState(() {
-      _fabColor = Colors.red; // Change FAB color on tap
-      _selectedIndex = 0; // Navigate to the SOS screen
+      _fabColor = Colors.red;
+      _selectedIndex = 0;
     });
 
-    // Restore original color after 300ms
     Future.delayed(const Duration(milliseconds: 300), () {
       if (mounted) {
         setState(() {
@@ -84,12 +100,47 @@ class _HomepageUserState extends State<HomepageUser> {
     });
   }
 
+  void startCountdown() {
+    setState(() {
+      isPressed = true;
+    });
+
+    countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (countdown > 1) {
+        setState(() {
+          countdown--;
+          buttonColor = countdown % 2 == 0 ? Color(0xffFFA500) : Colors.red;
+        });
+      } else {
+        timer.cancel();
+        sendSOSAlert();
+        resetButton();
+      }
+    });
+  }
+
+  void resetButton() {
+    setState(() {
+      countdown = 5;
+      isPressed = false;
+      buttonColor = Color(0xffFFA500);
+    });
+  }
+
+  void sendSOSAlert() {
+    print("SOS triggered");
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xff0C0C0C),
-
-      // Show AppBar only on SOS screen (index == 0)
       appBar:
           _selectedIndex == 0
               ? AppBar(
@@ -116,35 +167,66 @@ class _HomepageUserState extends State<HomepageUser> {
                 ),
                 backgroundColor: const Color(0xff0C0C0C),
               )
-              : null, // Hide AppBar for other screens
-
+              : null,
       body:
           _selectedIndex == 0
               ? Center(
-                child: ElevatedButton(
-                  onPressed: () {
-                    print(
-                      "🚨 SOS BUTTON PRESSED! Implement SOS function here.",
-                    );
+                child: GestureDetector(
+                  onLongPress: startCountdown,
+                  onLongPressEnd: (details) {
+                    countdownTimer?.cancel();
+                    resetButton();
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xffFFA500),
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 20,
-                      horizontal: 40,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: const Text(
-                    "EMERGENCY SOS",
-                    style: TextStyle(fontSize: 20, color: Colors.white),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _controller,
+                        builder: (context, child) {
+                          return Container(
+                            width: 200 + (_borderAnimation.value * 20),
+                            height: 200 + (_borderAnimation.value * 20),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.red,
+                                width: 5 + (_borderAnimation.value * 5),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: isPressed ? 150 : 180,
+                        height: isPressed ? 150 : 180,
+                        decoration: BoxDecoration(
+                          color: buttonColor,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Color(0xffFFA500),
+                              blurRadius: 20,
+                              spreadRadius: 10,
+                            ),
+                          ],
+                        ),
+                        child: Center(
+                          child: Text(
+                            isPressed ? "$countdown" : "Emergency",
+                            style: const TextStyle(
+                              fontFamily: 'Font1',
+                              fontSize: 30,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               )
-              : _screens[_selectedIndex - 1], // Display other screens
-
+              : _screens[_selectedIndex - 1],
       floatingActionButton: Container(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
@@ -162,11 +244,11 @@ class _HomepageUserState extends State<HomepageUser> {
           backgroundColor: _fabColor,
           splashColor: Colors.amber.shade600,
           elevation: 10,
+          heroTag: "Unique_sos_fab",
           child: const Icon(Icons.sos, size: 40),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _selectedIndex,
         onTabSelected: _onTabSelected,
