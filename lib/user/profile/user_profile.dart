@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:nexacare/screens/landingpage.dart';
 import 'package:nexacare/user/signin_User.dart';
 import 'package:nexacare/user/user_service/user_data_service.dart';
 
@@ -66,7 +67,7 @@ class _UserProfileState extends State<UserProfile> {
                   // Force UI update and navigate to Sign-in page
                   Navigator.pushAndRemoveUntil(
                     context,
-                    MaterialPageRoute(builder: (context) => const SigninUser()),
+                    MaterialPageRoute(builder: (context) => Landingpage()),
                     (route) => false, // Remove all previous routes
                   );
                 },

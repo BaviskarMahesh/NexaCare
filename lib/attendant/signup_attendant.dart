@@ -7,14 +7,14 @@ import 'package:nexacare/utils/textfield.dart';
 import 'package:animated_snack_bar/animated_snack_bar.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-class SigninUser extends StatefulWidget {
-  const SigninUser({super.key});
+class SignupAttendant extends StatefulWidget {
+  const SignupAttendant({super.key});
 
   @override
-  State<SigninUser> createState() => _SigninUserState();
+  State<SignupAttendant> createState() => _SignupAttendantState();
 }
 
-class _SigninUserState extends State<SigninUser> {
+class _SignupAttendantState extends State<SignupAttendant> {
   TextEditingController email = TextEditingController();
   TextEditingController password = TextEditingController();
   bool isLoading = false;
@@ -35,7 +35,7 @@ class _SigninUserState extends State<SigninUser> {
 
       await FirebaseAuth.instance.signInWithCredential(credential);
       // Navigate to home page or wherever you need after successful login
-      Navigator.pushReplacementNamed(context, Approutes.wrapper);
+      Navigator.pushReplacementNamed(context, Approutes.wrapperAttendant);
     } catch (e) {
       // Handle the error
       print("Error during Google sign-in: $e");
@@ -61,7 +61,7 @@ class _SigninUserState extends State<SigninUser> {
         email: email.text,
         password: password.text,
       );
-      Navigator.pushNamed(context, Approutes.wrapper);
+      Navigator.pushNamed(context, Approutes.wrapperAttendant);
     } on FirebaseAuthException catch (e) {
       String errorMessage = "Something went wrong. Please try again.";
 
