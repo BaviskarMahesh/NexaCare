@@ -14,7 +14,7 @@ import 'package:intl/intl.dart';
 import 'package:nexacare/utils/picker.dart';
 
 class AttendantDetails extends StatefulWidget {
-  const AttendantDetails({super.key});
+  const AttendantDetails({super.key,});
 
   @override
   State<AttendantDetails> createState() => _AttendantDetailsState();

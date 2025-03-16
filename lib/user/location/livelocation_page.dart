@@ -1,86 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:flutter_map/flutter_map.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LivelocationPage extends StatefulWidget {
-  const LivelocationPage({super.key});
-
   @override
   State<LivelocationPage> createState() => _LivelocationPageState();
 }
 
 class _LivelocationPageState extends State<LivelocationPage> {
-  GoogleMapController? _mapController;
-  Set<Marker> _markers = {};
-  bool _isMapLoaded = false; // ✅ Ensure map loads properly
+  final MapController _mapController = MapController();
+  LatLng? _currentLocation; // Store the latest location
 
-  static const LatLng _initialLocation = LatLng(
-    18.5204,
-    73.8567,
-  ); // Default location
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchLocationFromFirestore();
-  }
-
-  Future<void> _fetchLocationFromFirestore() async {
-    try {
-      QuerySnapshot snapshot =
-          await FirebaseFirestore.instance.collection('User').get();
-      Set<Marker> markers = {};
-
-      for (var doc in snapshot.docs) {
-        var data = doc.data() as Map<String, dynamic>;
+  /// Fetch user location stream from Firestore
+  Stream<LatLng?> _getUserLocationStream() {
+    return FirebaseFirestore.instance.collection('User').snapshots().map((
+      querySnapshot,
+    ) {
+      if (querySnapshot.docs.isNotEmpty) {
+        var data = querySnapshot.docs.first.data();
         if (data.containsKey('latitude') && data.containsKey('longitude')) {
-          String name = data['name'] ?? "Unknown";
-          double latitude = data['latitude'];
-          double longitude = data['longitude'];
-          String locationDetail =
-              data['locationDetail'] ?? "No details available";
+          double latitude = data['latitude'].toDouble();
+          double longitude = data['longitude'].toDouble();
 
-          markers.add(
-            Marker(
-              markerId: MarkerId(name),
-              position: LatLng(latitude, longitude),
-              infoWindow: InfoWindow(title: name, snippet: locationDetail),
-            ),
-          );
+          // Debugging: Print live location updates
+          print("Live Location Updated: Lat: $latitude, Lng: $longitude");
+
+          return LatLng(latitude, longitude);
         }
       }
+      return null;
+    });
+  }
 
+  /// Update map position without unnecessary movement
+  void _updateMapPosition(LatLng newLocation) {
+    if (_currentLocation == null ||
+        (_currentLocation!.latitude != newLocation.latitude ||
+            _currentLocation!.longitude != newLocation.longitude)) {
       setState(() {
-        _markers = markers;
+        _currentLocation = newLocation;
       });
-    } catch (e) {
-      print("Error fetching location: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          GoogleMap(
-            initialCameraPosition: const CameraPosition(
-              target: _initialLocation,
-              zoom: 13,
+      appBar: AppBar(title: const Text("Live Location Map")),
+      body: StreamBuilder<LatLng?>(
+        stream: _getUserLocationStream(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data != null) {
+            _updateMapPosition(snapshot.data!);
+          }
+
+          return FlutterMap(
+            mapController: _mapController,
+            options: MapOptions(
+              initialCenter:
+                  _currentLocation ??
+                  LatLng(20.5937, 78.9629), // Default: India
+              initialZoom: 15.0,
             ),
-            markers: _markers,
-            onMapCreated: (controller) {
-              _mapController = controller;
-              setState(() {
-                _isMapLoaded = true; // ✅ Ensure map loads
-              });
-            },
-          ),
-          if (!_isMapLoaded)
-            const Center(
-              child: CircularProgressIndicator(color: Color(0xffFFA500)),
-            ), // Show loading spinner until map is ready
-        ],
+            children: [
+              TileLayer(
+                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              ),
+              if (_currentLocation != null)
+                MarkerLayer(
+                  markers: [
+                    Marker(
+                      point: _currentLocation!,
+                      width: 50,
+                      height: 50,
+                      child: const Icon(
+                        Icons.location_on,
+                        size: 50,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+            ],
+          );
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          if (_currentLocation != null) {
+            _mapController.move(
+              _currentLocation!,
+              15.0,
+            ); // Move map to current location
+          }
+        },
+        child: const Icon(Icons.my_location),
       ),
     );
   }
