@@ -1,0 +1,2 @@
+D:/flutter_projects/NexaCare/nexacare/android/app/.cxx/RelWithDebInfo/4c3i1o70/armeabi-v7a/CMakeFiles/edit_cache.dir
+D:/flutter_projects/NexaCare/nexacare/android/app/.cxx/RelWithDebInfo/4c3i1o70/armeabi-v7a/CMakeFiles/rebuild_cache.dir

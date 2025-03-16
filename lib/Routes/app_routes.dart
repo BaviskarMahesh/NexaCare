@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:nexacare/attendant/attendant_details.dart';
+import 'package:nexacare/attendant/homepage_attendant.dart';
 import 'package:nexacare/attendant/signin_attendant.dart';
 import 'package:nexacare/email/forgotpswd.dart';
 import 'package:nexacare/screens/landingpage.dart';
@@ -8,6 +10,7 @@ import 'package:nexacare/user/signin_User.dart';
 import 'package:nexacare/user/signup_user.dart';
 import 'package:nexacare/user/user_healthdetails.dart';
 import 'package:nexacare/utils/wrapper.dart';
+import 'package:nexacare/utils/wrapperattendant.dart';
 
 class Approutes {
   static const String landingPage = '/';
@@ -19,6 +22,9 @@ class Approutes {
   static const String signupUser = '/signupUser';
   static const String userHealthDetails = '/userHealthDetails';
   static const String userlocationpermission = '/userlocationpermission';
+  static const String attendantDetail = '/attendantDetail';
+  static const String wrapperAttendant = '/wrapperAttendant';
+  static const String homepageAttendant = '/homepageAttendant';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -40,7 +46,12 @@ class Approutes {
         return MaterialPageRoute(builder: (_) => UserHealthdetails());
       case userlocationpermission:
         return MaterialPageRoute(builder: (_) => UserLocationPermission());
-
+      case attendantDetail:
+        return MaterialPageRoute(builder: (_) => AttendantDetails());
+      case wrapperAttendant:
+        return MaterialPageRoute(builder: (_) => WrapperAttendant());
+      case homepageAttendant:
+        return MaterialPageRoute(builder: (_) => HomepageAttendant());
       default:
         return MaterialPageRoute(
           builder:

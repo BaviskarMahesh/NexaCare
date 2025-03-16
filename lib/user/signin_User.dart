@@ -20,7 +20,6 @@ class _SigninUserState extends State<SigninUser> {
   bool isLoading = false;
   login() async {
     try {
-      
       final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
       if (googleUser == null) {
         // The user canceled the login
