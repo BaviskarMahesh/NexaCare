@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:nexacare/attendant/attendant_details.dart';
 import 'package:nexacare/attendant/homepage_attendant.dart';
+import 'package:nexacare/attendant/location/permissionlocationAttendant.dart';
 import 'package:nexacare/attendant/signin_attendant.dart';
 import 'package:nexacare/email/forgotpswd.dart';
 import 'package:nexacare/screens/landingpage.dart';
@@ -25,6 +26,8 @@ class Approutes {
   static const String attendantDetail = '/attendantDetail';
   static const String wrapperAttendant = '/wrapperAttendant';
   static const String homepageAttendant = '/homepageAttendant';
+  static const String attendantlocationpermission =
+      '/attendantlocationpermission';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -52,6 +55,8 @@ class Approutes {
         return MaterialPageRoute(builder: (_) => WrapperAttendant());
       case homepageAttendant:
         return MaterialPageRoute(builder: (_) => HomepageAttendant());
+      case attendantlocationpermission:
+        return MaterialPageRoute(builder: (_) => Permissionlocationattendant());
       default:
         return MaterialPageRoute(
           builder:

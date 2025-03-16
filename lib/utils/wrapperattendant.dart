@@ -19,10 +19,9 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
     _checkUserState();
   }
 
+  /// Function to check the user's authentication & profile state
   Future<void> _checkUserState() async {
-    await Future.delayed(
-      const Duration(milliseconds: 500),
-    ); // Small delay to prevent flickering
+    await Future.delayed(const Duration(milliseconds: 500)); // Prevents flickering
 
     User? user = FirebaseAuth.instance.currentUser;
 
@@ -32,10 +31,15 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
       _navigateTo(Verifyemail());
     } else {
       bool detailsFilled = await _isUserDetailsFilled();
-      if (detailsFilled) {
-        _navigateTo(const HomepageAttendant());
+      if (!detailsFilled) {
+        _navigateTo(const AttendantDetails()); // Fill details first
       } else {
-        _navigateTo(const AttendantDetails());
+        bool locationGranted = await _isLocationPermissionGranted();
+        if (!locationGranted) {
+          _navigateTo(UserLocationPermission()); // Request location permission
+        } else {
+          _navigateTo(const HomepageAttendant()); // Everything is set, go to homepage
+        }
       }
     }
   }
@@ -54,6 +58,7 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  /// Checks if the attendant has filled all required personal details
   Future<bool> _isUserDetailsFilled() async {
     User? user = _auth.currentUser;
     if (user == null) return false;
@@ -66,27 +71,32 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
 
       var data = snapshot.data() as Map<String, dynamic>;
 
-      bool hasPersonalDetails =
-          data.containsKey("name") &&
+      bool hasPersonalDetails = data.containsKey("name") &&
           data.containsKey("dateOfBirth") &&
           data.containsKey("mobileNumber") &&
           data.containsKey("gender") &&
           data.containsKey("homeAddress") &&
           data.containsKey("workLocation") &&
           data.containsKey("degree") &&
-          data["name"] != "" &&
-          data["dateOfBirth"] != "" &&
-          data["mobileNumber"] != "" &&
-          data["gender"] != "" &&
-          data["homeAddress"] != "" &&
-          data["workLocation"] != "" &&
-          data["degree"] != "";
+          data["name"].toString().trim().isNotEmpty &&
+          data["dateOfBirth"].toString().trim().isNotEmpty &&
+          data["mobileNumber"].toString().trim().isNotEmpty &&
+          data["gender"].toString().trim().isNotEmpty &&
+          data["homeAddress"].toString().trim().isNotEmpty &&
+          data["workLocation"].toString().trim().isNotEmpty &&
+          data["degree"].toString().trim().isNotEmpty;
 
       return hasPersonalDetails;
     } catch (e) {
       print("❌ Error fetching user details: $e");
       return false;
     }
+  }
+
+  /// Mock function to check if location permission is granted
+  Future<bool> _isLocationPermissionGranted() async {
+    // This should be replaced with actual location permission logic
+    return Future.value(true); // Assume permission is granted
   }
 
   @override

@@ -56,7 +56,7 @@ class _AttendantDetailsState extends State<AttendantDetails> {
     List<String> emptyFields = [];
     if (nameController.text.trim().isEmpty) emptyFields.add("Name");
     if (dobController.text.trim().isEmpty) emptyFields.add("Date of Birth");
-    if (mobileController.text.trim().isEmpty) emptyFields.add("Blood Group");
+    //if (mobileController.text.trim().isEmpty) emptyFields.add("Blood Group");
     if (genderContrller.text.trim().isEmpty) emptyFields.add("Gender");
     if (homeAddressController.text.trim().isEmpty)
       emptyFields.add("Home Location");
@@ -123,7 +123,7 @@ class _AttendantDetailsState extends State<AttendantDetails> {
 
       // Navigate to location permission screen
       Future.delayed(Duration(seconds: 2), () {
-        Navigator.pushNamed(context, Approutes.userlocationpermission);
+        Navigator.pushNamed(context, Approutes.attendantlocationpermission);
       });
     } catch (e) {
       AnimatedSnackBar.material(
@@ -380,7 +380,7 @@ TextField(
                     addUserDetails(context);
                     Navigator.pushNamed(
                       context,
-                      Approutes.userlocationpermission,
+                      Approutes.attendantlocationpermission,
                     );
                   },
                 ),

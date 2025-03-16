@@ -4,33 +4,50 @@ import 'package:latlong2/latlong.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/scheduler.dart';
 
-class LivelocationPage extends StatefulWidget {
+class Livelocationattendant extends StatefulWidget {
   @override
-  State<LivelocationPage> createState() => _LivelocationPageState();
+  State<Livelocationattendant> createState() => _LivelocationattendantState();
 }
 
-class _LivelocationPageState extends State<LivelocationPage> {
+class _LivelocationattendantState extends State<Livelocationattendant> {
   final MapController _mapController = MapController();
-  LatLng _currentLocation = LatLng(20.5937, 78.9629); // Default: India
+  LatLng _currentLocation = LatLng(18.5204, 73.8567); // Default: Pune
 
   /// Fetch user location stream from Firestore
   Stream<LatLng> _getUserLocationStream() {
-    return FirebaseFirestore.instance.collection('User').snapshots().map((
+    return FirebaseFirestore.instance.collection('Attendant').snapshots().map((
       querySnapshot,
     ) {
       if (querySnapshot.docs.isNotEmpty) {
         var data = querySnapshot.docs.first.data();
+
+        print(
+          "Firestore Raw Data: $data",
+        ); // Debug: Check Firestore data format
+
         if (data.containsKey('latitude') && data.containsKey('longitude')) {
-          double latitude = data['latitude'].toDouble();
-          double longitude = data['longitude'].toDouble();
+          try {
+            double latitude = (data['latitude'] as num).toDouble();
+            double longitude = (data['longitude'] as num).toDouble();
 
-          // Debugging: Print live location updates
-          print("Live Location Updated: Lat: $latitude, Lng: $longitude");
+            print("Extracted Location -> Lat: $latitude, Lng: $longitude");
 
-          return LatLng(latitude, longitude);
+            if (latitude != 0.0 && longitude != 0.0) {
+              return LatLng(latitude, longitude);
+            } else {
+              print("Invalid Lat/Lng (0.0, 0.0), returning Pune default");
+            }
+          } catch (e) {
+            print("Error parsing latitude/longitude: $e");
+          }
+        } else {
+          print("Firestore document missing 'latitude' or 'longitude' keys.");
         }
+      } else {
+        print("No documents found in 'Attendant' collection.");
       }
-      return _currentLocation; // Return last known location
+
+      return _currentLocation; // Return Pune default if no valid data
     });
   }
 
@@ -43,6 +60,7 @@ class _LivelocationPageState extends State<LivelocationPage> {
           setState(() {
             _currentLocation = newLocation;
           });
+          _mapController.move(newLocation, 15.0);
         }
       });
     }
@@ -57,6 +75,8 @@ class _LivelocationPageState extends State<LivelocationPage> {
         builder: (context, snapshot) {
           if (snapshot.hasData) {
             _updateMapPosition(snapshot.data!);
+          } else if (snapshot.hasError) {
+            print("Error fetching location: ${snapshot.error}");
           }
 
           return FlutterMap(
