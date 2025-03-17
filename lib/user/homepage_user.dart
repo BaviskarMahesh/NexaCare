@@ -1,7 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:nexacare/services/chatBox/chatBox.dart';
+import 'package:nexacare/Chat_Service/Chat_Screens/chatBox.dart';
+import 'package:nexacare/services/chatBox/listOfattendantforchat.dart';
 import 'package:nexacare/user/attendantService/near_Attendant.dart';
 import 'package:nexacare/user/location/livelocation_page.dart';
 import 'package:nexacare/user/profile/user_profile.dart';
@@ -28,7 +29,7 @@ class _HomepageUserState extends State<HomepageUser>
   final List<Widget> _screens = [
     NearAttendant(),
     LivelocationPage(),
-    Chatbox(),
+    Listofattendantforchat(),
     UserProfile(),
   ];
 

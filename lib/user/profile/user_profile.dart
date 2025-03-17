@@ -64,11 +64,11 @@ class _UserProfileState extends State<UserProfile> {
                 onPressed: () async {
                   await FirebaseAuth.instance.signOut();
 
-                  // Force UI update and navigate to Sign-in page
+                  
                   Navigator.pushAndRemoveUntil(
                     context,
                     MaterialPageRoute(builder: (context) => Landingpage()),
-                    (route) => false, // Remove all previous routes
+                    (route) => false,  
                   );
                 },
                 backgroundColor: const Color.fromARGB(255, 255, 77, 0),

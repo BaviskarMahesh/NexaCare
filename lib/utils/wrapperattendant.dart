@@ -19,9 +19,10 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
     _checkUserState();
   }
 
-  /// Function to check the user's authentication & profile state
   Future<void> _checkUserState() async {
-    await Future.delayed(const Duration(milliseconds: 500)); // Prevents flickering
+    await Future.delayed(
+      const Duration(milliseconds: 500),
+    ); // Prevents flickering
 
     User? user = FirebaseAuth.instance.currentUser;
 
@@ -30,18 +31,22 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
     } else if (!user.emailVerified) {
       _navigateTo(Verifyemail());
     } else {
-      bool detailsFilled = await _isUserDetailsFilled();
-      if (!detailsFilled) {
-        _navigateTo(const AttendantDetails()); // Fill details first
+      bool detailsExist = await _doesUserDetailsExist();
+      if (detailsExist) {
+        _navigateTo(const HomepageAttendant()); // Ask to fill details
       } else {
-        bool locationGranted = await _isLocationPermissionGranted();
-        if (!locationGranted) {
-          _navigateTo(UserLocationPermission()); // Request location permission
-        } else {
-          _navigateTo(const HomepageAttendant()); // Everything is set, go to homepage
-        }
+        _navigateTo(const AttendantDetails());
       }
     }
+
+    bool locationGranted = await _isLocationPermissionGranted();
+    if (!locationGranted) {
+      _navigateTo(UserLocationPermission()); // Request location permission
+      return;
+    }
+
+    // If everything is set, go to homepage
+    _navigateTo(const HomepageAttendant());
   }
 
   /// Function to navigate to a new screen and clear previous stack
@@ -58,8 +63,8 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Checks if the attendant has filled all required personal details
-  Future<bool> _isUserDetailsFilled() async {
+  /// Checks if the attendant's details already exist in Firestore
+  Future<bool> _doesUserDetailsExist() async {
     User? user = _auth.currentUser;
     if (user == null) return false;
 
@@ -67,11 +72,14 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
       DocumentSnapshot snapshot =
           await _firestore.collection('Attendant').doc(user.uid).get();
 
-      if (!snapshot.exists) return false;
+      if (!snapshot.exists) return false; // Document does not exist
 
-      var data = snapshot.data() as Map<String, dynamic>;
+      var data = snapshot.data() as Map<String, dynamic>?;
 
-      bool hasPersonalDetails = data.containsKey("name") &&
+      if (data == null) return false;
+
+      bool hasPersonalDetails =
+          data.containsKey("name") &&
           data.containsKey("dateOfBirth") &&
           data.containsKey("mobileNumber") &&
           data.containsKey("gender") &&
@@ -86,7 +94,7 @@ class _WrapperAttendantState extends State<WrapperAttendant> {
           data["workLocation"].toString().trim().isNotEmpty &&
           data["degree"].toString().trim().isNotEmpty;
 
-      return hasPersonalDetails;
+      return hasPersonalDetails; // Return true only if all details exist
     } catch (e) {
       print("❌ Error fetching user details: $e");
       return false;

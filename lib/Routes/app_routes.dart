@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:nexacare/Chat_Service/Chat_Screens/chatBox.dart';
 import 'package:nexacare/attendant/attendant_details.dart';
 import 'package:nexacare/attendant/homepage_attendant.dart';
 import 'package:nexacare/attendant/location/permissionlocationAttendant.dart';
 import 'package:nexacare/attendant/signin_attendant.dart';
 import 'package:nexacare/email/forgotpswd.dart';
 import 'package:nexacare/screens/landingpage.dart';
+import 'package:nexacare/services/chatBox/listOfattendantforchat.dart';
 import 'package:nexacare/user/homepage_user.dart';
 import 'package:nexacare/user/location/user_locationpermission.dart';
 import 'package:nexacare/user/signin_User.dart';
@@ -28,6 +30,8 @@ class Approutes {
   static const String homepageAttendant = '/homepageAttendant';
   static const String attendantlocationpermission =
       '/attendantlocationpermission';
+  static const String ListOfAttendantforChat = '/ListOfAttendantforChat';
+  static const String ChatBoxUser = '/ChatBoxUser';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -57,12 +61,32 @@ class Approutes {
         return MaterialPageRoute(builder: (_) => HomepageAttendant());
       case attendantlocationpermission:
         return MaterialPageRoute(builder: (_) => Permissionlocationattendant());
+      case ListOfAttendantforChat:
+        return MaterialPageRoute(builder: (_) => Listofattendantforchat());
+      case ChatBoxUser:
+        if (settings.arguments is Map<String, dynamic>) {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (_) => Chatbox(
+              senderId: args['senderId'],
+              receiverId: args['receiverId'],
+              receiverName: args['receiverName'],
+              chatId: args['chatId'],
+            ),
+          );
+        }
+        return _errorRoute();
+
       default:
-        return MaterialPageRoute(
-          builder:
-              (_) =>
-                  const Scaffold(body: Center(child: Text('Page not found!'))),
-        );
+        return _errorRoute();
     }
+  }
+
+  static Route<dynamic> _errorRoute() {
+    return MaterialPageRoute(
+      builder: (_) => const Scaffold(
+        body: Center(child: Text('Page not found!')),
+      ),
+    );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:nexacare/screens/landingpage.dart';
 
 class AttedantProfile extends StatefulWidget {
   const AttedantProfile({Key? key}) : super(key: key);
@@ -32,6 +33,31 @@ class _AttedantProfileState extends State<AttedantProfile> {
           "Attendant Profile",
           style: TextStyle(fontFamily: 'Font1', fontSize: 20),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: SizedBox(
+              height: 50,
+              width: 50,
+              child: FloatingActionButton(
+                splashColor: Colors.red,
+                onPressed: () async {
+                  await FirebaseAuth.instance.signOut();
+
+                  
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => Landingpage()),
+                    (route) => false,  
+                  );
+                },
+                backgroundColor: const Color.fromARGB(255, 255, 77, 0),
+
+                child: const Icon(Icons.logout),
+              ),
+            ),
+          ),
+        ],
       ),
       body: FutureBuilder<DocumentSnapshot>(
         future: _firestore.collection("Attendant").doc(user.uid).get(),
