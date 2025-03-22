@@ -95,7 +95,7 @@ class _ChatboxState extends State<Chatbox> {
                           message["text"],
                           style: TextStyle(
                             fontFamily: 'Font1',
-                            color: Colors.white,
+                            color: Color(0xffffffff),
                           ),
                         ),
                       ),
