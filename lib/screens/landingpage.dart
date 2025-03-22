@@ -47,8 +47,9 @@ class _LandingpageState extends State<Landingpage> {
             SizedBox(height: 20),
             customElevatedButton(
               text: "User",
+               buttonColor: Color(0xffFFA500),
               textStyle: TextStyle(
-                color: Color(0xffFFFFFF),
+                color: Color(0xff0C0C0C),
                 fontSize: 20,
                 fontFamily: 'Font1',
               ),
@@ -63,8 +64,9 @@ class _LandingpageState extends State<Landingpage> {
 
             customElevatedButton(
               text: "Attendant",
+               buttonColor: Color(0xffFFA500),
               textStyle: TextStyle(
-                color: Color(0xffFFFFFF),
+                color: Color(0xff0C0C0C),
                 fontSize: 20,
                 fontFamily: 'Font1',
               ),

@@ -15,15 +15,14 @@ class ChatRepositoryImpl implements ChatRepository {
   }
 
   @override
-  Stream<List<MessageEntity>> getMessages(String receiverId) {
-    String currentUserId = _auth.currentUser!.uid;
-    String chatId = _generateChatId(currentUserId, receiverId);
+  Stream<List<MessageModel>> getMessages(String senderId, String receiverId) {
+    String chatId = _generateChatId(senderId, receiverId);
 
     return _firestore
         .collection("chats")
         .doc(chatId)
         .collection("messages")
-        .orderBy("timestamp", descending: false)
+        .orderBy("timestamp", descending: true) // ✅ Show newest messages first
         .snapshots()
         .map(
           (snapshot) =>
@@ -35,45 +34,49 @@ class ChatRepositoryImpl implements ChatRepository {
 
   @override
   Future<void> sendMessage(MessageEntity message, String receiverId) async {
-    String senderId = _auth.currentUser!.uid;
-    String chatId = _generateChatId(senderId, receiverId);
+    try {
+      String senderId = _auth.currentUser!.uid;
+      String chatId = _generateChatId(senderId, receiverId);
 
-    DocumentReference chatDocRef = _firestore.collection("chats").doc(chatId);
-    CollectionReference messagesRef = chatDocRef.collection("messages");
+      DocumentReference chatDocRef = _firestore.collection("chats").doc(chatId);
+      CollectionReference messagesRef = chatDocRef.collection("messages");
 
-    MessageModel messageModel = MessageModel(
-      id: "",
-      chatId: chatId,
-      text: message.text,
-      senderId: senderId,
-      receiverId: receiverId,
-      timestamp: Timestamp.fromDate(DateTime.now()),
-      read: false,
-    );
+      DocumentReference newMessageDocRef =
+          messagesRef.doc(); // ✅ Generate ID first
 
-    await messagesRef.add(messageModel.toJson());
+      MessageModel messageModel = MessageModel(
+        id: newMessageDocRef.id,
+        chatId: chatId,
+        text: message.text,
+        senderId: senderId,
+        receiverId: receiverId,
+        timestamp: Timestamp.fromDate(DateTime.now()),
+        read: false,
+      );
 
-    await chatDocRef.set({
-      "userId": senderId,
-      "receiverId": receiverId,
-      "lastMessage": message.text,
-      "lastMessageTime": Timestamp.now(),
-    }, SetOptions(merge: true));
+      await newMessageDocRef.set(messageModel.toJson()); // ✅ Save with ID
 
-    await _incrementUnreadCount(chatDocRef, receiverId);
+      await chatDocRef.set({
+        "userId": senderId,
+        "receiverId": receiverId,
+        "lastMessage": message.text,
+        "lastMessageTime": Timestamp.now(),
+      }, SetOptions(merge: true));
+
+      await _incrementUnreadCount(chatDocRef, receiverId);
+    } catch (e) {
+      print("Error sending message: $e");
+    }
   }
 
-  @override
   @override
   Future<void> markMessagesAsRead(String userId, String attendantId) async {
     try {
       String chatId = _generateChatId(userId, attendantId);
       DocumentReference chatDocRef = _firestore.collection("chats").doc(chatId);
 
-       
       await chatDocRef.set({"unread_$userId": 0}, SetOptions(merge: true));
 
-       
       QuerySnapshot unreadMessages =
           await chatDocRef
               .collection("messages")
@@ -81,7 +84,6 @@ class ChatRepositoryImpl implements ChatRepository {
               .where("read", isEqualTo: false)
               .get();
 
-       
       WriteBatch batch = _firestore.batch();
       for (var doc in unreadMessages.docs) {
         batch.update(doc.reference, {"read": true});
@@ -96,15 +98,23 @@ class ChatRepositoryImpl implements ChatRepository {
     DocumentReference chatDocRef,
     String receiverId,
   ) async {
-    DocumentSnapshot chatDoc = await chatDocRef.get();
+    try {
+      DocumentSnapshot chatDoc = await chatDocRef.get();
+      if (!chatDoc.exists) {
+        await chatDocRef.set({
+          "unread_$receiverId": 1,
+        }, SetOptions(merge: true));
+        return;
+      }
 
-    int unreadCount = 1;
-    if (chatDoc.exists && chatDoc.data() != null) {
-      unreadCount = (chatDoc["unread_$receiverId"] ?? 0) + 1;
+      Map<String, dynamic>? data = chatDoc.data() as Map<String, dynamic>?;
+      int unreadCount = (data?["unread_$receiverId"] ?? 0) + 1;
+
+      await chatDocRef.set({
+        "unread_$receiverId": unreadCount,
+      }, SetOptions(merge: true));
+    } catch (e) {
+      print("Error updating unread count: $e");
     }
-
-    await chatDocRef.set({
-      "unread_$receiverId": unreadCount,
-    }, SetOptions(merge: true));
   }
 }

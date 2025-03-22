@@ -1,11 +1,9 @@
 import 'package:nexacare/Chat_Service/Entity/messageEntity.dart';
 
 abstract class ChatRepository {
-  
-  Stream<List<MessageEntity>> getMessages(String chatId);
+  Stream<List<MessageEntity>> getMessages(String senderId, String receiverId);
 
-  
-  Future<void> sendMessage(MessageEntity message, String chatId);
+  Future<void> sendMessage(MessageEntity message, String receiverId);
 
-  Future<void> markMessagesAsRead(String chatId, String userId);
+  Future<void> markMessagesAsRead(String userId, String attendantId);
 }

@@ -6,8 +6,7 @@ class GetMessages {
 
   GetMessages(this.repository);
 
- 
-  Stream<List<MessageEntity>> call(String chatId) {
-    return repository.getMessages(chatId);
+  Stream<List<MessageEntity>> call(String senderId, String receiverId) {
+    return repository.getMessages(senderId, receiverId);
   }
 }

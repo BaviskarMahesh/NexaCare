@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:nexacare/Chat_Service/Entity/messageEntity.dart';
+import 'package:nexacare/Chat_Service/reposiory/chat_message_implementation.dart';
 import 'package:nexacare/utils/textfield.dart';
 
 class Chatbox extends StatefulWidget {
@@ -21,10 +24,13 @@ class Chatbox extends StatefulWidget {
 
 class _ChatboxState extends State<Chatbox> {
   final TextEditingController _messageController = TextEditingController();
+  final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final ChatRepositoryImpl _chatRepository = ChatRepositoryImpl();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       appBar: AppBar(
         title: Text(
           widget.receiverName,
@@ -35,24 +41,41 @@ class _ChatboxState extends State<Chatbox> {
         children: [
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream:
-                  FirebaseFirestore.instance
-                      .collection("chats")
-                      .doc(widget.chatId)
-                      .collection("messages")
-                      .orderBy("timestamp", descending: true)
-                      .snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection("chats")
+                  .doc(widget.chatId)
+                  .collection("messages")
+                  .orderBy("timestamp", descending: true)
+                  .snapshots(),
               builder: (context, snapshot) {
-                if (!snapshot.hasData)
+                if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  print("No messages found for chatId: ${widget.chatId}");
+                  return Center(
+                    child: Text(
+                      "No messages yet",
+                      style: TextStyle(fontFamily: 'Font1'),
+                    ),
+                  );
+                }
+
                 var messages = snapshot.data!.docs;
 
                 return ListView.builder(
                   reverse: true,
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
-                    var message =
-                        messages[index].data() as Map<String, dynamic>;
+                    var message = messages[index].data() as Map<String, dynamic>;
+                    if (!message.containsKey("text") ||
+                        !message.containsKey("senderId") ||
+                        !message.containsKey("timestamp")) {
+                      print("Skipping message due to missing fields: $message");
+                      return SizedBox.shrink();
+                    }
+
                     bool isMe = message["senderId"] == widget.senderId;
 
                     return Align(
@@ -65,17 +88,14 @@ class _ChatboxState extends State<Chatbox> {
                           horizontal: 10,
                         ),
                         decoration: BoxDecoration(
-                          color:
-                              isMe
-                                  ? const Color.fromARGB(255, 112, 111, 111)
-                                  : Color(0xffFFA500),
+                          color: isMe ? Colors.grey[700] : Colors.orange,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
                           message["text"],
                           style: TextStyle(
                             fontFamily: 'Font1',
-                            color: Color(0xffffffff),
+                            color: Colors.white,
                           ),
                         ),
                       ),
@@ -105,9 +125,8 @@ class _ChatboxState extends State<Chatbox> {
                 color: Color.fromARGB(255, 164, 159, 159),
               ),
               suffixIcon: Icons.send,
-              suffixIconColor: Colors.orange, // Customize color
-              onSuffixIconPressed:
-                  _sendMessage, // Send message when send icon is pressed
+              suffixIconColor: Colors.orange,
+              onSuffixIconPressed: _sendMessage,
             ),
           ),
         ],
@@ -115,20 +134,22 @@ class _ChatboxState extends State<Chatbox> {
     );
   }
 
-  void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
+  void _sendMessage() async {
+    if (_messageController.text.trim().isNotEmpty) {
+      print("Sending message to chatId: ${widget.chatId}");
 
-    FirebaseFirestore.instance
-        .collection("chats")
-        .doc(widget.chatId)
-        .collection("messages")
-        .add({
-          "text": _messageController.text.trim(),
-          "senderId": widget.senderId,
-          "receiverId": widget.receiverId,
-          "timestamp": Timestamp.now(),
-        });
+      MessageEntity message = MessageEntity(
+        chatId: widget.chatId,
+        text: _messageController.text.trim(),
+        senderId: widget.senderId,
+        receiverId: widget.receiverId,
+        timestamp: DateTime.now(),
+      );
 
-    _messageController.clear();
+      await _chatRepository.sendMessage(message, widget.chatId);
+      
+      setState(() {}); // Force UI update
+      _messageController.clear();
+    }
   }
 }

@@ -19,12 +19,19 @@ class _NearAttendantState extends State<NearAttendant> {
   }
 
   Future<void> _getUserLocation() async {
-    Position position = await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
-    );
-    setState(() {
-      _currentPosition = position;
-    });
+    try {
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      if (mounted) {
+        // ✅ Check before calling setState
+        setState(() {
+          _currentPosition = position;
+        });
+      }
+    } catch (e) {
+      print("Error getting location: $e");
+    }
   }
 
   double _calculateDistance(
@@ -33,8 +40,12 @@ class _NearAttendantState extends State<NearAttendant> {
     double lat2,
     double lon2,
   ) {
-    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) /
-        1000; // Convert meters to km
+    return Geolocator.distanceBetween(lat1, lon1, lat2, lon2) / 1000;
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -81,7 +92,7 @@ class _NearAttendantState extends State<NearAttendant> {
                             lat,
                             lon,
                           );
-                          return distance <= 5.0; // Only show if within 5 km
+                          return distance <= 5.0;
                         }
                         return false;
                       }).toList();
@@ -100,7 +111,7 @@ class _NearAttendantState extends State<NearAttendant> {
                               style: TextStyle(
                                 fontFamily: 'Font1',
                                 fontSize: 15,
-                                color: Color(0xffffffff),
+                                color: Colors.white,
                               ),
                             ),
                             subtitle: Text(
@@ -108,20 +119,23 @@ class _NearAttendantState extends State<NearAttendant> {
                               style: TextStyle(
                                 fontFamily: 'Font1',
                                 fontSize: 11,
-                                color: Color(0xffffffff),
+                                color: Colors.white,
                               ),
                             ),
                             trailing: Icon(Icons.arrow_forward_ios),
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder:
-                                      (context) => Attendantprofile(
-                                        userId: users[index].id,
-                                      ),
-                                ),
-                              );
+                              if (mounted) {
+                                // ✅ Check before navigation
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => Attendantprofile(
+                                          userId: users[index].id,
+                                        ),
+                                  ),
+                                );
+                              }
                             },
                           );
                         },
