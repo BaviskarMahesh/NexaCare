@@ -1,3 +1,4 @@
+
 import 'package:flutter/material.dart';
 import 'package:nexacare/attendant/signin_attendant.dart';
 import 'package:nexacare/Routes/app_routes.dart';
@@ -47,9 +48,8 @@ class _LandingpageState extends State<Landingpage> {
             SizedBox(height: 20),
             customElevatedButton(
               text: "User",
-               buttonColor: Color(0xffFFA500),
               textStyle: TextStyle(
-                color: Color(0xff0C0C0C),
+                color: Color(0xffFFFFFF),
                 fontSize: 20,
                 fontFamily: 'Font1',
               ),
@@ -64,9 +64,8 @@ class _LandingpageState extends State<Landingpage> {
 
             customElevatedButton(
               text: "Attendant",
-               buttonColor: Color(0xffFFA500),
               textStyle: TextStyle(
-                color: Color(0xff0C0C0C),
+                color: Color(0xffFFFFFF),
                 fontSize: 20,
                 fontFamily: 'Font1',
               ),

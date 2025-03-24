@@ -28,14 +28,14 @@ class _HomepageUserState extends State<HomepageUser>
 
   final List<Widget> _screens = [
     NearAttendant(),
-    LivelocationPage(),
+    LiveLocationPage(),
     Listofattendantforchat(),
     UserProfile(),
   ];
 
   late AnimationController _controller;
   late Animation<double> _borderAnimation;
-  int countdown = 5;
+  int countdown = 3;
   bool isPressed = false;
   Timer? countdownTimer;
   Color buttonColor = Color(0xffFFA500);
@@ -122,7 +122,7 @@ class _HomepageUserState extends State<HomepageUser>
 
   void resetButton() {
     setState(() {
-      countdown = 5;
+      countdown = 3;
       isPressed = false;
       buttonColor = Color(0xffFFA500);
     });
@@ -207,7 +207,7 @@ class _HomepageUserState extends State<HomepageUser>
                           boxShadow: [
                             BoxShadow(
                               color: Color(0xffFFA500),
-                              blurRadius: 20,
+                              blurRadius: 40,
                               spreadRadius: 10,
                             ),
                           ],

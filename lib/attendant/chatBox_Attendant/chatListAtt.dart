@@ -2,11 +2,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:nexacare/Chat_Service/Chat_Screens/chatBox.dart';
 
-class Chatlistatt extends StatelessWidget {
+class Chatlistatt extends StatefulWidget {
   final String attendantId;
 
   Chatlistatt({required this.attendantId});
 
+  @override
+  State<Chatlistatt> createState() => _ChatlistattState();
+}
+
+class _ChatlistattState extends State<Chatlistatt> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,13 +24,22 @@ class Chatlistatt extends StatelessWidget {
         stream:
             FirebaseFirestore.instance
                 .collection("chats")
-                .where("attendantId", isEqualTo: attendantId)
+                .where("attendantId", isEqualTo: widget.attendantId)
                 .snapshots(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return Center(child: CircularProgressIndicator(
-              color: Color(0xffFFA500),
-            ));
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(color: Color(0xffFFA500)),
+            );
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(
+              child: Text(
+                "No Chats Yet",
+                style: TextStyle(color: Colors.white),
+              ),
+            );
           }
 
           var chats = snapshot.data!.docs;
@@ -34,10 +48,12 @@ class Chatlistatt extends StatelessWidget {
             itemCount: chats.length,
             itemBuilder: (context, index) {
               var chatData = chats[index].data() as Map<String, dynamic>;
+
               String chatId = chats[index].id;
-              String userId = chatData["userId"];
-              String userName = chatData["userName"];
-              String userLocation = chatData["userLocation"];
+              String userId = chatData["userId"] ?? "Unknown";
+              String userName = chatData["userName"] ?? "No Name";
+              String userLocation =
+                  chatData["userLocation"] ?? "Unknown Location";
               int unreadCount = chatData["unreadCount"] ?? 0;
 
               return ListTile(
@@ -56,20 +72,21 @@ class Chatlistatt extends StatelessWidget {
                             style: TextStyle(color: Colors.white, fontSize: 12),
                           ),
                         )
-                        : null, // ✅ Show unread count badge
+                        : null,
                 onTap: () async {
-                  // ✅ Reset unread count when user opens chat
+                  // Reset unread messages count
                   await FirebaseFirestore.instance
                       .collection("chats")
                       .doc(chatId)
                       .update({"unreadCount": 0});
 
+                  // Navigate to chat screen
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) => Chatbox(
-                            senderId: attendantId,
+                          (context) => ChatBox(
+                            senderId: widget.attendantId,
                             receiverId: userId,
                             receiverName: userName,
                             chatId: chatId,

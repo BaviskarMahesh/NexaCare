@@ -43,7 +43,7 @@ class _HomepageAttendantState extends State<HomepageAttendant> {
       }
     });
   }
-
+   
   /// Initializes the screens with a valid `attendantId`
   void _initializeScreens() {
     setState(() {

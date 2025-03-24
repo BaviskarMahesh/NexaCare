@@ -67,7 +67,7 @@ class Approutes {
         if (settings.arguments is Map<String, dynamic>) {
           final args = settings.arguments as Map<String, dynamic>;
           return MaterialPageRoute(
-            builder: (_) => Chatbox(
+            builder: (_) =>  ChatBox(
               senderId: args['senderId'],
               receiverId: args['receiverId'],
               receiverName: args['receiverName'],

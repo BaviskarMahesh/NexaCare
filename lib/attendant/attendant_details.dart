@@ -2,7 +2,9 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:nexacare/Notification_service/fcm_service.dart';
 import 'package:nexacare/Routes/app_routes.dart';
 import 'package:nexacare/utils/dropdown.dart';
 import 'package:nexacare/utils/elevatedbutton.dart';
@@ -14,7 +16,7 @@ import 'package:intl/intl.dart';
 import 'package:nexacare/utils/picker.dart';
 
 class AttendantDetails extends StatefulWidget {
-  const AttendantDetails({super.key,});
+  const AttendantDetails({super.key});
 
   @override
   State<AttendantDetails> createState() => _AttendantDetailsState();
@@ -43,6 +45,29 @@ class _AttendantDetailsState extends State<AttendantDetails> {
     super.dispose();
   }
 
+  final FcmService _fcmService = FcmService();
+  void initState() {
+    super.initState();
+    _fcmService.updateFCMToken();
+  }
+
+  //  Future<void> updateFCMToken() async {
+  //   try {
+  //     User? user = FirebaseAuth.instance.currentUser;
+  //     if (user == null) return;
+
+  //     String? token = await FirebaseMessaging.instance.getToken();
+  //     if (token == null) return;
+
+  //     await FirebaseFirestore.instance.collection('Attendants').doc(user.uid).update({
+  //       'fcmtoken': token,
+  //     });
+
+  //     print("FCM Token Updated Successfully!");
+  //   } catch (e) {
+  //     print("Error updating FCM token: $e");
+  //   }
+  // }
   Future<void> addUserDetails(BuildContext context) async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -51,6 +76,7 @@ class _AttendantDetailsState extends State<AttendantDetails> {
     }
 
     String uid = user.uid;
+    String? fcmToken = await FirebaseMessaging.instance.getToken();
 
     // Check for empty fields
     List<String> emptyFields = [];
@@ -80,7 +106,10 @@ class _AttendantDetailsState extends State<AttendantDetails> {
     try {
       // Fetch existing user data
       DocumentSnapshot userDoc =
-          await FirebaseFirestore.instance.collection("Attendant").doc(uid).get();
+          await FirebaseFirestore.instance
+              .collection("Attendant")
+              .doc(uid)
+              .get();
 
       Map<String, dynamic> existingData =
           userDoc.exists ? userDoc.data() as Map<String, dynamic> : {};
@@ -92,8 +121,9 @@ class _AttendantDetailsState extends State<AttendantDetails> {
         "mobile number": mobileController.text.trim(),
         "gender": genderContrller.text.trim(),
         "home Address": homeAddressController.text.trim(),
-        "Work Location" : WorkLocationController.text.trim(),
-        "degree" :degreeController.text.trim(), 
+        "Work Location": WorkLocationController.text.trim(),
+        "degree": degreeController.text.trim(),
+        "fcmToken": fcmToken,
 
         // Preserve existing location details if available
         "city": existingData["city"] ?? "",
@@ -135,6 +165,25 @@ class _AttendantDetailsState extends State<AttendantDetails> {
         ),
         mobileSnackBarPosition: MobileSnackBarPosition.top,
       ).show(context);
+    }
+  }
+
+  Future<void> updateFCMToken() async {
+    try {
+      User? user = FirebaseAuth.instance.currentUser;
+      if (user == null) return;
+
+      String? token = await FirebaseMessaging.instance.getToken();
+      if (token == null) return;
+
+      await FirebaseFirestore.instance
+          .collection('Attendants')
+          .doc(user.uid)
+          .update({'fcmtoken': token});
+
+      print("FCM Token Updated Successfully!");
+    } catch (e) {
+      print("Error updating FCM token: $e");
     }
   }
 
@@ -246,45 +295,45 @@ class _AttendantDetailsState extends State<AttendantDetails> {
                 ),
                 SizedBox(height: screenHeight * 0.02),
                 Text(
-  "Mobile Number",
-  style: TextStyle(
-    color: Colors.white,
-    fontFamily: 'Font1',
-    fontSize: 15,
-  ),
-),
-SizedBox(height: screenHeight * 0.01),
-TextField(
-  controller: mobileController,
-  keyboardType: TextInputType.phone,
-  maxLength: 10, // Assuming a 10-digit mobile number
-  style: TextStyle(fontFamily: 'Font1'),
-  decoration: TextfieldUtil.inputDecoration(
-    hintText: "Enter your mobile number",
-  
-  ),
-),
+                  "Mobile Number",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Font1',
+                    fontSize: 15,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                TextField(
+                  controller: mobileController,
+                  keyboardType: TextInputType.phone,
+                  maxLength: 10, // Assuming a 10-digit mobile number
+                  style: TextStyle(fontFamily: 'Font1'),
+                  decoration: TextfieldUtil.inputDecoration(
+                    hintText: "Enter your mobile number",
+                  ),
+                ),
 
                 SizedBox(height: screenHeight * 0.02),
                 Text(
-  "Attendant Degree",
-  style: TextStyle(
-    color: Colors.white,
-    fontFamily: 'Font1',
-    fontSize: 15,
-  ),
-),
-SizedBox(height: screenHeight * 0.01),
-TextField(
-  controller: degreeController, // Use a TextEditingController to store input
-  keyboardType: TextInputType.text, // Standard text input for degrees
-  style: TextStyle(fontFamily: 'Font1'),
-  decoration: TextfieldUtil.inputDecoration(
-    hintText: "Enter Attendant Degree",
-    
-  ),
-),
-SizedBox(height: screenHeight*0.02,),
+                  "Attendant Degree",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Font1',
+                    fontSize: 15,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                TextField(
+                  controller:
+                      degreeController, // Use a TextEditingController to store input
+                  keyboardType:
+                      TextInputType.text, // Standard text input for degrees
+                  style: TextStyle(fontFamily: 'Font1'),
+                  decoration: TextfieldUtil.inputDecoration(
+                    hintText: "Enter Attendant Degree",
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.02),
 
                 const Text(
                   "Gender",
@@ -294,7 +343,7 @@ SizedBox(height: screenHeight*0.02,),
                     fontSize: 15,
                   ),
                 ),
-                
+
                 SizedBox(height: screenHeight * 0.01),
                 TextField(
                   readOnly: true,
@@ -324,46 +373,46 @@ SizedBox(height: screenHeight*0.02,),
                   ),
                 ),
                 SizedBox(height: screenHeight * 0.02),
-               Text(
-  "Attendant Home Address",
-  style: TextStyle(
-    color: Colors.white,
-    fontFamily: 'Font1',
-    fontSize: 15,
-  ),
-),
-SizedBox(height: screenHeight * 0.01),
-TextField(
-  controller: homeAddressController, // Use a TextEditingController to store input
-  keyboardType: TextInputType.streetAddress,
-  maxLines: 3, // Allow multiple lines for address input
-  style: TextStyle(fontFamily: 'Font1'),
-  decoration: TextfieldUtil.inputDecoration(
-    hintText: "Enter Attendant Home Address",
-    
-  ),
-),
+                Text(
+                  "Attendant Home Address",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Font1',
+                    fontSize: 15,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                TextField(
+                  controller:
+                      homeAddressController, // Use a TextEditingController to store input
+                  keyboardType: TextInputType.streetAddress,
+                  maxLines: 3, // Allow multiple lines for address input
+                  style: TextStyle(fontFamily: 'Font1'),
+                  decoration: TextfieldUtil.inputDecoration(
+                    hintText: "Enter Attendant Home Address",
+                  ),
+                ),
 
                 SizedBox(height: screenHeight * 0.02),
-               Text(
-  "Attendant Work Location",
-  style: TextStyle(
-    color: Colors.white,
-    fontFamily: 'Font1',
-    fontSize: 15,
-  ),
-),
-SizedBox(height: screenHeight * 0.01),
-TextField(
-  controller: WorkLocationController, // Use a TextEditingController to store input
-  keyboardType: TextInputType.streetAddress,
-  maxLines: 2, // Allow multiple lines for work location input
-  style: TextStyle(fontFamily: 'Font1'),
-  decoration: TextfieldUtil.inputDecoration(
-    hintText: "Enter Attendant Work Location",
-    
-  ),
-),
+                Text(
+                  "Attendant Work Location",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Font1',
+                    fontSize: 15,
+                  ),
+                ),
+                SizedBox(height: screenHeight * 0.01),
+                TextField(
+                  controller:
+                      WorkLocationController, // Use a TextEditingController to store input
+                  keyboardType: TextInputType.streetAddress,
+                  maxLines: 2, // Allow multiple lines for work location input
+                  style: TextStyle(fontFamily: 'Font1'),
+                  decoration: TextfieldUtil.inputDecoration(
+                    hintText: "Enter Attendant Work Location",
+                  ),
+                ),
 
                 SizedBox(height: screenHeight * 0.02),
 
