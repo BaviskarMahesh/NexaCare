@@ -1,101 +1,129 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-class LivelocationPage extends StatefulWidget {
+import 'package:geolocator/geolocator.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+class LiveLocationPage extends StatefulWidget {
   @override
-  State<LivelocationPage> createState() => _LivelocationPageState();
+  State<LiveLocationPage> createState() => _LiveLocationPageState();
 }
 
-class _LivelocationPageState extends State<LivelocationPage> {
-  final MapController _mapController = MapController();
-  LatLng? _currentLocation; // Store the latest location
+class _LiveLocationPageState extends State<LiveLocationPage> {
+  String googleMapsApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 
-  /// Fetch user location stream from Firestore
-  Stream<LatLng?> _getUserLocationStream() {
-    return FirebaseFirestore.instance.collection('User').snapshots().map((
-      querySnapshot,
-    ) {
-      if (querySnapshot.docs.isNotEmpty) {
-        var data = querySnapshot.docs.first.data();
-        if (data.containsKey('latitude') && data.containsKey('longitude')) {
-          double latitude = data['latitude'].toDouble();
-          double longitude = data['longitude'].toDouble();
+  GoogleMapController? _mapController;
+  LatLng _currentLocation = LatLng(
+    20.5937,
+    78.9629,
+  ); // Default location (India)
+  Set<Marker> _markers = {}; // Store markers
 
-          // Debugging: Print live location updates
-          print("Live Location Updated: Lat: $latitude, Lng: $longitude");
-
-          return LatLng(latitude, longitude);
-        }
-      }
-      return null;
-    });
+  @override
+  void initState() {
+    super.initState();
+    _requestLocationPermission();
+    _fetchAttendants(); // Fetch attendants on init
   }
 
-  /// Update map position without unnecessary movement
-  void _updateMapPosition(LatLng newLocation) {
-    if (_currentLocation == null ||
-        (_currentLocation!.latitude != newLocation.latitude ||
-            _currentLocation!.longitude != newLocation.longitude)) {
-      setState(() {
-        _currentLocation = newLocation;
-      });
+  /// Request location permissions
+  Future<void> _requestLocationPermission() async {
+    LocationPermission permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      print("Location permissions are denied.");
+    } else {
+      _getLiveLocation();
     }
+  }
+
+  /// Fetch user's current location
+  Future<void> _getLiveLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+
+    setState(() {
+      _currentLocation = LatLng(position.latitude, position.longitude);
+      _markers.add(
+        Marker(
+          markerId: MarkerId("currentLocation"),
+          position: _currentLocation,
+          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
+          infoWindow: InfoWindow(title: "Your Location"),
+        ),
+      );
+    });
+
+    _mapController?.animateCamera(
+      CameraUpdate.newLatLngZoom(_currentLocation, 14.0),
+    );
+  }
+
+  /// Fetch attendants within 5 km and add them to the map
+  Future<void> _fetchAttendants() async {
+    QuerySnapshot attendantsSnapshot =
+        await FirebaseFirestore.instance.collection('Attendant').get();
+
+    Set<Marker> newMarkers = {};
+
+    for (var doc in attendantsSnapshot.docs) {
+      var data = doc.data() as Map<String, dynamic>;
+
+      if (data.containsKey('latitude') && data.containsKey('longitude')) {
+        double lat = data['latitude'];
+        double lon = data['longitude'];
+
+        newMarkers.add(
+          Marker(
+            markerId: MarkerId(doc.id),
+            position: LatLng(lat, lon),
+            icon: BitmapDescriptor.defaultMarkerWithHue(
+              BitmapDescriptor.hueBlue,
+            ), // Blue pin
+            infoWindow: InfoWindow(
+              title: data["name"] ?? "No Name",
+              snippet: data["degree"] ?? "No Degree",
+            ),
+          ),
+        );
+      }
+    }
+
+    setState(() {
+      _markers.addAll(newMarkers);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Live Location Map")),
-      body: StreamBuilder<LatLng?>(
-        stream: _getUserLocationStream(),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data != null) {
-            _updateMapPosition(snapshot.data!);
-          }
-
-          return FlutterMap(
-            mapController: _mapController,
-            options: MapOptions(
-              initialCenter:
-                  _currentLocation ??
-                  LatLng(20.5937, 78.9629), // Default: India
-              initialZoom: 15.0,
-            ),
-            children: [
-              TileLayer(
-                urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-              ),
-              if (_currentLocation != null)
-                MarkerLayer(
-                  markers: [
-                    Marker(
-                      point: _currentLocation!,
-                      width: 50,
-                      height: 50,
-                      child: const Icon(
-                        Icons.location_on,
-                        size: 50,
-                        color: Colors.red,
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          );
+      appBar: AppBar(
+        title: const Text(
+          "Live Location Map",
+          style: TextStyle(fontFamily: 'Font1', color: Color(0xffFFFFFF)),
+        ),
+      ),
+      body: GoogleMap(
+        initialCameraPosition: CameraPosition(
+          target: _currentLocation,
+          zoom: 14.0,
+        ),
+        markers: _markers,
+        onMapCreated: (GoogleMapController controller) {
+          _mapController = controller;
         },
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (_currentLocation != null) {
-            _mapController.move(
-              _currentLocation!,
-              15.0,
-            ); // Move map to current location
-          }
-        },
-        child: const Icon(Icons.my_location),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 100, left: 10),
+        child: FloatingActionButton(
+          backgroundColor: Color(0xff0c0c0c),
+
+          onPressed: () {
+            _getLiveLocation();
+            _fetchAttendants(); // Refresh markers
+          },
+          child: const Icon(Icons.my_location, color: Color(0xffFFA500)),
+        ),
       ),
     );
   }

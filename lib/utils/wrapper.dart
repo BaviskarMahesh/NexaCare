@@ -21,8 +21,7 @@ class _WrapperState extends State<Wrapper> {
     _checkUserState();
   }
 
-  /// Function to check user authentication and navigate accordingly
-  Future<void> _checkUserState() async {
+   Future<void> _checkUserState() async {
     await Future.delayed(
       const Duration(milliseconds: 500),
     ); // Small delay to prevent flickering
