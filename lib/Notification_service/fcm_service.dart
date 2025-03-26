@@ -8,8 +8,7 @@ class FcmService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  /// 🔹 Store or Update the FCM token in Firestore
+ 
   Future<void> updateFCMToken() async {
     try {
       User? user = _auth.currentUser;
@@ -26,14 +25,12 @@ class FcmService {
 
       print("Updating FCM Token for: ${user.uid}, Token: $token");
 
-      // 🔹 Store FCM token under 'Attendant' collection
       await _firestore.collection('Attendant').doc(user.uid).set({
         'fcmToken': token,
       }, SetOptions(merge: true));
 
       print("FCM Token Updated Successfully!");
 
-      // 🔹 Listen for token refresh and update Firestore
       _firebaseMessaging.onTokenRefresh.listen((newToken) {
         _firestore.collection('Attendant').doc(user.uid).update({
           'fcmToken': newToken,
@@ -44,7 +41,26 @@ class FcmService {
     }
   }
 
-  /// 🔹 Send SOS Notification to all attendants
+  void requestNotificationPermission() async {
+    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: true,
+      badge: true,
+      carPlay: true,
+      criticalAlert: true,
+      provisional: true,
+      sound: true,
+    );
+    if (settings.authorizationStatus == AuthorizationStatus.authorized) {
+      print(' User granted Permission');
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+           print(' User granted provisional Permission');
+        }else{
+           print(' User denied Permission');
+        }
+  }
+
   Future<void> sendSOSNotification({
     required String sosId,
     required double latitude,
@@ -53,12 +69,12 @@ class FcmService {
   }) async {
     String serverKey = "YOUR_FCM_SERVER_KEY"; // Get from Firebase Console
 
-    // 🔹 Fetch attendants' FCM tokens from Firestore
     QuerySnapshot attendants = await _firestore.collection("Attendant").get();
-    List<String> fcmTokens = attendants.docs
-        .where((doc) => doc.data().toString().contains("fcmToken"))
-        .map((doc) => doc["fcmToken"].toString())
-        .toList();
+    List<String> fcmTokens =
+        attendants.docs
+            .where((doc) => doc.data().toString().contains("fcmToken"))
+            .map((doc) => doc["fcmToken"].toString())
+            .toList();
 
     if (fcmTokens.isEmpty) {
       print("No attendants found with valid FCM tokens!");
