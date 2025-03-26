@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:nexacare/Notification_service/fcm_service.dart';
 import 'package:nexacare/attendant/Emergency_request/emergencyrequest.dart';
 import 'package:nexacare/attendant/chatBox_Attendant/chatListAtt.dart';
 import 'package:nexacare/attendant/location/liveLocationAttendant.dart';
@@ -20,8 +19,9 @@ class _HomepageAttendantState extends State<HomepageAttendant> {
   int _selectedIndex = 0;
   String _attendantName = "Attendant";
   String _attendantLocation = "No Location Info";
-  List<Widget> _screens = [];
-  FcmService notificationServices = FcmService();
+  List<Widget> _screens = [];  
+
+  
 
   @override
   void initState() {
@@ -44,10 +44,8 @@ class _HomepageAttendantState extends State<HomepageAttendant> {
         }
       }
     });
-
-    notificationServices.requestNotificationPermission();
   }
-
+   
   /// Initializes the screens with a valid `attendantId`
   void _initializeScreens() {
     setState(() {
@@ -125,7 +123,9 @@ class _HomepageAttendantState extends State<HomepageAttendant> {
           _screens.isNotEmpty
               ? _screens[_selectedIndex]
               : Center(
-                child: CircularProgressIndicator(color: Color(0xffFFA500)),
+                child: CircularProgressIndicator(
+                  color: Color(0xffFFA500),
+                ),
               ), // Show loader if screens are not initialized
       bottomNavigationBar: NavbarAtt(
         selectedIndex: _selectedIndex,
