@@ -8,7 +8,7 @@ class FcmService {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
- 
+  
   Future<void> updateFCMToken() async {
     try {
       User? user = _auth.currentUser;
