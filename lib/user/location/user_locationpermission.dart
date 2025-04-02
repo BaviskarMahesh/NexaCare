@@ -163,6 +163,7 @@ class _UserLocationPermissionState extends State<UserLocationPermission> {
       SnackBar(
         content: Text(message, style: const TextStyle(color: Colors.white)),
         backgroundColor: Colors.green,
+        
       ),
     );
   }

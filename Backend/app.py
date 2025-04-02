@@ -5,7 +5,7 @@ import os
 
 app = Flask(__name__)
 
-FIREBASE_CRED_PATH = r"D:/flutter_projects/NexaCare/nexacare/Backend/nexacare-d797f-firebase-adminsdk-fbsvc-9f19a4ec40.json"
+FIREBASE_CRED_PATH = r"D:\flutter_projects\NexaCare\nexacare\Backend\nexacare-d797f-firebase-adminsdk-fbsvc-9f19a4ec40.json"
 if not os.path.exists(FIREBASE_CRED_PATH):
     raise FileNotFoundError(f"Firebase credential file not found: {FIREBASE_CRED_PATH}")
 
