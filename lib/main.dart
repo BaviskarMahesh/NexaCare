@@ -1,98 +1,103 @@
+import 'dart:async';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:nexacare/Notification_service/fcm_service.dart';
 import 'package:nexacare/Routes/app_routes.dart';
-import 'package:nexacare/splashScreen/splashscreen.dart';
 import 'package:nexacare/utils/wrapper.dart';
 import 'package:nexacare/firebase_options.dart';
-   
 
+// Background message handler
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  print("Received background message: ${message.messageId}");
+  print("📩 Received background message: ${message.messageId}");
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
 
-  String? firebaseCredPath = dotenv.env['FIREBASE_CRED_PATH'];
+  // Load .env file from correct path
+  try {
+    await dotenv.load(fileName: "lib/assets/.env");
+    print("✅ .env file loaded successfully!");
+  } catch (e) {
+    print("❌ Error loading .env file: $e");
+  }
+
+  // Fetch environment variables
   String? googleMapsApiKey = dotenv.env['GOOGLE_MAPS_API_KEY'];
-
-  if (firebaseCredPath == null || firebaseCredPath.isEmpty) {
-    throw Exception(" FIREBASE_CRED_PATH is missing in .env file.");
-  }
-
   if (googleMapsApiKey == null || googleMapsApiKey.isEmpty) {
-    throw Exception(" GOOGLE_MAPS_API_KEY is missing in .env file.");
+    print("⚠️ Warning: GOOGLE_MAPS_API_KEY is missing in .env file.");
   }
 
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-
-  FlutterError.onError = (FlutterErrorDetails details) {
-    print("Flutter Error: ${details.exceptionAsString()}");
-  };
+  // Initialize Firebase
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    print("✅ Firebase initialized successfully!");
+  } catch (e) {
+    print("❌ Error initializing Firebase: $e");
+  }
 
   runApp(const NexaCare());
 }
 
-class NexaCare extends StatefulWidget {
+class NexaCare extends StatelessWidget {
   const NexaCare({super.key});
 
   @override
-  State<NexaCare> createState() => _NexaCareState();
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'NexaCare',
+      theme: ThemeData.light().copyWith(
+        textSelectionTheme: const TextSelectionThemeData(
+          cursorColor: Color(0xff969292),
+        ),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xff0C0C0C)),
+        dialogTheme: const DialogTheme(backgroundColor: Color(0xff0C0C0C)),
+      ),
+      darkTheme: ThemeData.dark(),
+      themeMode: ThemeMode.system,
+      debugShowCheckedModeBanner: false,
+      home: const SplashScreen(),
+    );
+  }
 }
 
-class _NexaCareState extends State<NexaCare> {
-  bool _initialized = false;
-  bool _error = false;
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    initializeFirebase();
-  }
-
-  Future<void> initializeFirebase() async {
-    try {
-      await Firebase.initializeApp();
-      setState(() => _initialized = true);
-    } catch (e) {
-      setState(() => _error = true);
-    }
+    Timer(const Duration(seconds: 3), () {
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const Wrapper()));
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_error) {
-      return MaterialApp(
-        home: Scaffold(body: Center(child: Text("Failed to initialize Firebase"))),
-      );
-    }
-
-    if (!_initialized) {
-      return MaterialApp(
-        home: Scaffold(body: Center(child: CircularProgressIndicator())),
-      );
-    }
-
-    return MaterialApp(
-      title: 'NexaCare',
-      theme: ThemeData(
-        brightness: Brightness.light,
-        textSelectionTheme: TextSelectionThemeData(cursorColor: Color(0xff969292)),
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff0C0C0C)),
-        dialogTheme: DialogTheme(backgroundColor: Color(0xff0C0C0C)),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset('assets/images/logo 2.jpeg.jpg', height: 120),
+            const SizedBox(height: 20),
+            const CircularProgressIndicator(color: Colors.white),
+          ],
+        ),
       ),
-      darkTheme: ThemeData(brightness: Brightness.dark),
-      themeMode: ThemeMode.system,
-      home: Splashscreen(),  
-      debugShowCheckedModeBanner: false,
-      initialRoute: Approutes.landingPage,
-      onGenerateRoute: Approutes.generateRoute,
     );
   }
 }

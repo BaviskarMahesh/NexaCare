@@ -41,12 +41,19 @@ dependencies:
   flutter_dotenv: ^5.2.1 
   video_player: ^2.9.5
   get: ^4.7.2
+  
   #google_sign_in: ^6.2.2
 
 # Development-only dependencies (used for testing & linting).
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "lib/assets/images/logo 2.jpeg.jpg"
 
   # Recommended linting rules for best coding practices.
   flutter_lints: ^5.0.0
@@ -59,6 +66,7 @@ flutter:
   assets:
     - lib/assets/images/
     - lib/assets/videos/NexaCareVid.mp4
+    - lib/assets/.env
 
   # Custom fonts for the application.
   fonts:
