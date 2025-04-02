@@ -31,19 +31,16 @@ dependencies:
   geolocator: ^13.0.2
   geocoding: ^3.0.0
   logger: ^2.5.0
- 
- 
   latlong2: ^0.9.1
-  
   flutter_map: ^6.1.0
   firebase_messaging: ^15.2.4
   http: ^1.3.0
   provider: ^6.1.2
   equatable: ^2.0.7
   google_maps_flutter: ^2.11.0
-  flutter_dotenv: ^5.2.1
- 
-  app_settings: ^5.2.0
+  flutter_dotenv: ^5.2.1 
+  video_player: ^2.9.5
+  get: ^4.7.2
   
   #google_sign_in: ^6.2.2
 
@@ -51,6 +48,12 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.3
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "lib/assets/images/logo 2.jpeg.jpg"
 
   # Recommended linting rules for best coding practices.
   flutter_lints: ^5.0.0
@@ -62,6 +65,8 @@ flutter:
   # Defines app assets (e.g., images, fonts).
   assets:
     - lib/assets/images/
+    - lib/assets/videos/NexaCareVid.mp4
+    - lib/assets/.env
 
   # Custom fonts for the application.
   fonts:
